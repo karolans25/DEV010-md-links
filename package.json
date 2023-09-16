@@ -10,9 +10,13 @@
     "commit": "1e61f863787ca573e7e7235dfba9b94c0a4efae3"
   },
   "scripts": {
+    "eslint": "eslint --ext .js test/",
+    "pretest": "npm run eslint",
     "test": "jest --coverage"
   },
   "devDependencies": {
+    "eslint": "^8.49.0",
+    "eslint-config-google": "^0.14.0",
     "jest": "^29.7.0"
   }
 }
