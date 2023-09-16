@@ -7,9 +7,8 @@ const constants = fs.constants;
 //   '.md', '.mkd', '.mdwn', '.mdown', '.mdtxt', '.mdtext', '.markdown', '.text',
 // ];
 
-// const fileExists = (filePath) => access(filePath, constants.F_OK)
-//     .then(() => true)
-//     .catch((err) => reject(new Error(err.message)));
+const fileExists = (filePath) => access(filePath, constants.F_OK);
+// .catch((err) => reject(new Error(err.message)));
 
 const mdlinks = (thePath) => {
   return new Promise((resolve, reject) => {
@@ -18,13 +17,9 @@ const mdlinks = (thePath) => {
         reject(new TypeError('The path is invalid'));
       }
       const absolutePath = path.resolve(thePath);
-      resolve(absolutePath);
-      // const exist = fileExists(absolutePath);
-      // if (exist) {
-      //   resolve(absolutePath);
-      // } else {
-      //   reject(new Error('The path doesn\'t exist'));
-      // }
+      fileExists(absolutePath)
+          .then(() => resolve(absolutePath))
+          .catch((err) => reject(new Error('No such file or directory')));
     } catch (err) {
       reject(new Error(err.message));
     }
@@ -32,7 +27,8 @@ const mdlinks = (thePath) => {
 };
 
 // const thePath = 200;
-// const thePath = './some/example.md';
+// const thePath = './somes/example.md';
+// const thePath = './somes/example.md';
 // mdlinks(thePath)
 //     .then((res) => console.log(res))
 //     .catch((err) => console.log(err.message));
