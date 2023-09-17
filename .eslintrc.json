@@ -4,23 +4,10 @@
         "commonjs": true,
         "es2021": true
     },
-    "plugins": ["jest"],
-    "extends": "google",
+    "extends": "airbnb-base",
     "parserOptions": {
         "ecmaVersion": "latest"
     },
     "rules": {
-        "max-len": ["error", { "code": 95 }],
-        "quotes": ["error", "single"],
-        "linebreak-style": 0,
-        "prefer-destructuring": 0,
-        "no-param-reassign": ["error", { "props": false }],
-        "jest/no-disabled-tests": "warn",
-        "jest/no-focused-tests": "warn",
-        "jest/no-identical-title": "error",
-        "jest/prefer-to-have-length": "warn",
-        "jest/valid-expect": "error",
-        "no-plusplus": "off",
-        "confirm": "off"
     }
 }
