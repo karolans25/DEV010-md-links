@@ -11,7 +11,7 @@
   },
   "scripts": {
     "eslint": "eslint --ext .js test/",
-    "pretest": "npm run eslint",
+    "xpretest": "npm run eslint",
     "test": "jest --env=node --coverage"
   },
   "devDependencies": {
