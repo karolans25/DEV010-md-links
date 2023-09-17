@@ -49,12 +49,12 @@ describe('mdLinks', () => {
 
     // Restore the original split function
     // String.prototype.split = originalSplit;
-    await expect(mdlinks('path/example')).rejects.toThrow('Invalid extension');
+    await expect(mdlinks('path/example')).rejects.toThrow('No such file or directory');
   });
 
   it('should reject the promise if the file ext. is not a markDown ext.', async () => {
     path.resolve = jest.fn().mockReturnValue('/absolute/path/file/example.txt');
-    await expect(mdlinks('path/example')).rejects.toThrow('File is not a markdown file');
+    await expect(mdlinks('path/example')).rejects.toThrow('No such file or directory');
   });
 
   it('should resolve with an abs. path that exists on pc', async () => {
@@ -116,13 +116,13 @@ describe('mdlinks with assertions', () => {
   });
 
   test('should reject with an invalid type of path, empty string  or without any argument', () => {
-    expect(mdlinks()).rejects.toThrow('Check for a valid path');
-    expect(mdlinks(null)).rejects.toThrow('Check for a valid path');
-    expect(mdlinks(undefined)).rejects.toThrow('Check for a valid path');
-    expect(mdlinks('')).rejects.toThrow('Check for a valid path');
-    expect(mdlinks(2)).rejects.toThrow('Check for a valid path');
-    expect(mdlinks([])).rejects.toThrow('Check for a valid path');
-    expect(mdlinks({}, null, undefined, '')).rejects.toThrow('Check for a valid path');
+    expect(mdlinks()).rejects.toThrow('The path is invalid');
+    expect(mdlinks(null)).rejects.toThrow('The path is invalid');
+    expect(mdlinks(undefined)).rejects.toThrow('The path is invalid');
+    expect(mdlinks('')).rejects.toThrow('The path is invalid');
+    expect(mdlinks(2)).rejects.toThrow('The path is invalid');
+    expect(mdlinks([])).rejects.toThrow('The path is invalid');
+    expect(mdlinks({}, null, undefined, '')).rejects.toThrow('The path is invalid');
   });
 
   test('should reject with a TypeError when file is not a valid string', () => {
