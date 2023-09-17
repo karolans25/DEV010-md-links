@@ -101,7 +101,12 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/example.txt';
 // const thePath = './some/';
 // const thePath = './some/example.md';
-// mdlinks(thePath)
+// const thePath = './some/example1.md';
+
+// mdlinks(thePath, false)
+//   .then((res) => console.log(res))
+//   .catch((err) => console.log(err.message));
+// mdlinks(thePath, true)
 //   .then((res) => console.log(res))
 //   .catch((err) => console.log(err.message));
 
