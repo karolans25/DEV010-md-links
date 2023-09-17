@@ -14,12 +14,19 @@ const markDownExtensions = [
 const verifyUrl = (url) => fetch(url)
   .then((res) => {
     const data = {
-      status: res.status,
-      ok: res.statusText.toLowerCase(),
+      status: (typeof res.status === 'undefined') ? 404 : res.status,
+      ok: (typeof res.statusText === 'undefined') ? 'fail' : res.statusText.toLowerCase(),
     }
     return data;
   })
-  .catch((err) => err);
+  .catch((err) => {
+    const data = {
+      status: 500,
+      ok: 'fail',
+    }
+    return data;
+    console.log(err);
+  });
 
 const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, reject) => {
   try{
@@ -102,11 +109,10 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/';
 // const thePath = './some/example.md';
 // const thePath = './some/example1.md';
-
-// mdlinks(thePath, false)
+// mdlinks(thePath, true)
 //   .then((res) => console.log(res))
 //   .catch((err) => console.log(err.message));
-// mdlinks(thePath, true)
+// mdlinks(thePath, false)
 //   .then((res) => console.log(res))
 //   .catch((err) => console.log(err.message));
 
