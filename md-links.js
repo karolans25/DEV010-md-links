@@ -1,99 +1,100 @@
-const fs = require('fs/promises');
+const fs = require('fs');
 const path = require('path');
-const markdownIt = require('markdown-it');
+// const markdownIt = require('markdown-it');
 
-const { access } = fs;
-const { constants } = fs;
-const { readFile } = fs;
-const md = markdownIt({ linkify: true });
+const fsP = fs.promises;
+const { existsSync } = fs;
+const readFile = fsP;
+// fsP.existsSync;
+// const { stat } = fsP;
+// const { access } = fsP;
+// const { constants } = fsP;
+// const md = markdownIt({ linkify: true });
 
 const markDownExtensions = [
   '.md', '.mkd', '.mdwn', '.mdown', '.mdtxt', '.mdtext', '.markdown', '.text',
 ];
 
-const verifyUrl = (url) => fetch(url)
-  .then((res) => {
-    const data = {
-      status: res.status,
-      ok: res.statusText.toLowerCase(),
-    }
-    return data;
-  })
-  .catch((err) => err);
+// const verifyUrl = (url) => fetch(url)
+//   .then((res) => {
+//     const data = {
+//       status: res.status,
+//       ok: res.statusText.toLowerCase(),
+//     };
+//     return data;
+//   })
+//   .catch((err) => err);
 
-const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, reject) => {
-  try{
-    const links = [];
-    const html = md.render(text);
-    const lines = html.split('\n');
-    const max = lines.length;
-    for (let i = 0; i < max; i++) {
-      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
-      let match;
-      while ((match = regex.exec(lines[i])) !== null) {
-        const link = {
-          href: match[2],
-          text: match[3],
-          file: filePath,
-          line: parseInt(i, 10) + 1,
-        };
-        links.push(link);
-      }
-    }
-    if (validate) {
-      const linksVerified = links.map((link) => verifyUrl(link.href)
-        .then((res) => {
-          link.status = res.status;
-          link.ok = res.ok;
-          return link;
-        }));
+// const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, reject) => {
+//   try {
+//     const links = [];
+//     const html = md.render(text);
+//     const lines = html.split('\n');
+//     const max = lines.length;
+//     for (let i = 0; i < max; i++) {
+//       const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
+//       let match;
+//       while ((match = regex.exec(lines[i])) !== null) {
+//         const link = {
+//           href: match[2],
+//           text: match[3],
+//           file: filePath,
+//           line: parseInt(i, 10) + 1,
+//         };
+//         links.push(link);
+//       }
+//     }
+//     if (validate) {
+//       const linksVerified = links.map((link) => verifyUrl(link.href)
+//         .then((res) => {
+//           link.status = res.status;
+//           link.ok = res.ok;
+//           return link;
+//         }));
 
-      Promise.all(linksVerified).then((result) => {
-        resolve(result);
-      });
-    } else {
-      resolve(links);
-    }
-  } catch (err){
-    reject(new Error (err.message));
-  }
-});
-
-const fileExists = (filePath) => access(filePath, constants.F_OK);
-// .catch((err) => reject(new Error(err.message)));
+//       Promise.all(linksVerified).then((result) => {
+//         resolve(result);
+//       });
+//     } else {
+//       resolve(links);
+//     }
+//   } catch (err) {
+//     reject(new Error(err.message));
+//   }
+// });
 
 const readAFile = (file) => readFile(file, 'utf8')
   .then((markdown) => markdown)
-  .catch((err) => new Error(err.message));
+  .catch((err) => err);
 
-const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
-  try {
-    if (typeof thePath !== 'string' || thePath === '') {
-      reject(new TypeError('The path is invalid'));
-    }
-    const absolutePath = path.resolve(thePath);
-    fileExists(absolutePath)
-      .then(() => {
-        const splitPath = absolutePath.split('/');
-        const splitExt = splitPath.pop().split('.');
-        if (splitExt.length <= 1 || splitExt[splitExt.length - 1] === '') {
-          reject(new Error('It\'s a directory or invalid extension'));
-        }
-        const ext = `.${splitExt.pop()}`;
-        if (!markDownExtensions.includes(ext)) {
-          reject(new Error('File is not a markdown file'));
-        }
-        readAFile(absolutePath)
-          .then((text) => {
-            const links = getLinksFromHtml(absolutePath, text, validate);
-            resolve(links);
-          })
-          .catch((err) => reject(new Error('Couldn\'t read the file')));
-      })
-      .catch((err) => reject(new Error('No such file or directory')));
-  } catch (err) {
-    reject(new Error(err.message));
+const fileExists = (filePath) => existsSync(filePath);
+
+const mdlinks = (thePath) => new Promise((resolve, reject) => {
+  if (typeof thePath !== 'string' || thePath === '') {
+    reject(new TypeError('The path is invalid'));
   }
+  const absolutePath = path.resolve(thePath);
+  const exists = fileExists(absolutePath);
+  if (!exists) {
+    reject(new Error('No such file or directory'));
+  }
+  const splitPath = absolutePath.split('/');
+  const splitExt = splitPath.pop().split('.');
+  if (splitExt.length <= 1) {
+    reject(new Error('It\'s a directory'));
+  }
+  const ext = `.${splitExt.pop()}`;
+  if (ext !== '' && !markDownExtensions.includes(ext)) {
+    reject(new Error('File is not a markdown file'));
+  }
+  readAFile(absolutePath)
+    .then((text) => {
+      console.log(text);
+      resolve(absolutePath);
+      // const links = getLinksFromHtml(absolutePath, text, validate);
+      // resolve(links);
+    })
+    .catch((err) => reject(err));
 });
 
 // const thePath = 200;
@@ -102,7 +103,6 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/';
 // const thePath = './some/example.md';
 // const thePath = './some/example1.md';
-
 // mdlinks(thePath, false)
 //   .then((res) => console.log(res))
 //   .catch((err) => console.log(err.message));
