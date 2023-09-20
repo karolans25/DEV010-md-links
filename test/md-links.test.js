@@ -2,13 +2,9 @@ const DATA_RESULT = '[{"file":"/home/karolans/Documents/Github/Laboratoria/Bootc
 
 const path = require('path');
 const fs = require('fs');
+const fsP = require('fs/promises');
+// const readFile = require('fs').promises;
 const { mdlinks } = require('../md-links');
-
-// const { stat } = fsP;
-// const { access } = fsP;
-// const { constants } = fsP;
-// const fsP = fs.promises;
-// const readFile = fsP;
 
 jest.mock('path', () => ({
   resolve: jest.fn(),
@@ -16,22 +12,16 @@ jest.mock('path', () => ({
 
 jest.mock('fs', () => ({
   existsSync: jest.fn(),
+  promises: {
+    readFile: jest.fn(),
+  },
 }));
+// jest.mock('fs/promises');
 
-jest.mock('fs/promises', () => ({
-  readFile: jest.fn(),
-}));
 // jest.mock('fs/promises', () => ({
-//   stat: jest.fn(),
-//   access: jest.fn(),
 //   readFile: jest.fn(),
 // }));
 
-// stat.mockResolvedValue({message: 'Exists'});
-// access.mockResolvedValue('Exists');
-// readFile.mockResolvedValue('Read');
-// path.resolve = jest.fn();
-// fsPromises.access = jest.fn();
 const thePath = '/some/example';
 
 describe('mdLinks', () => {
@@ -54,7 +44,7 @@ describe('mdLinks', () => {
   //   return expect(mdlinks()).rejects.toThrow(TypeError);
   // });
 
-  it('mdlinks should reject if absolute path doesn\'t exist', () => {
+  it('should reject if absolute path doesn\'t exist', () => {
     const absolutePath = '/absolute/path';
     path.resolve.mockReturnValue(absolutePath);
     fs.existsSync.mockReturnValue(false);
@@ -66,7 +56,7 @@ describe('mdLinks', () => {
   //   return expect(mdlinks('./some/example')).rejects.toThrow(Error);
   // });
 
-  it('mdlinks should reject if the path is a directory', () => {
+  it('should reject if the path is a directory', () => {
     const absolutePath = '/absolute/path';
     path.resolve.mockReturnValue(absolutePath);
     fs.existsSync.mockReturnValue(true);
@@ -83,27 +73,38 @@ describe('mdLinks', () => {
   //   return expect(mdlinks('./some/example.js')).rejects.toThrow(Error);
   // });
 
-  it('mdlinks should reject if the path is not a markdown file', () => {
+  it('should reject if the path is not a markdown file', () => {
     const absolutePath = '/absolute/path.txt';
     path.resolve.mockReturnValue(absolutePath);
     fs.existsSync.mockReturnValue(true);
     return expect(mdlinks(thePath)).rejects.toThrow(Error);
   });
 
-  it('mdlinks should reject if can\'t read the file', () => {
-    const absolutePath = '/absolute/path.txt';
-    path.resolve.mockReturnValue(absolutePath);
-    fs.existsSync.mockReturnValue(true);
-    fs.promises.readFile.mockResolvedValue('# Example\nThis is an example');
-    return expect(mdlinks(thePath)).resolves.toStrictEqual(absolutePath);
-  });
-
-  it.skip('mdlinks should resolve if absolute path exists', () => {
+  it('should reject if file can\'t be read', () => {
     const absolutePath = '/absolute/path.md';
     path.resolve.mockReturnValue(absolutePath);
     fs.existsSync.mockReturnValue(true);
+    fs.promises.readFile.mockRejectedValue(new Error('Can\'t read a file'));
+    return expect(mdlinks(thePath)).rejects.toThrow(Error);
+  });
+
+  it('should resolve if file is read', () => {
+    const absolutePath = '/absolute/path.md';
+    path.resolve.mockReturnValue(absolutePath);
+    fs.existsSync.mockReturnValue(true);
+    const expectedContents = '# Example\nThis is an example';
+    // fs.promises.readFile.jest.fn().mockResolvedValue(expectedContents);
+    fsP.readFile = jest.fn();
+    fsP.readFile.mockResolvedValue(expectedContents);
     return expect(mdlinks(thePath)).resolves.toBe(absolutePath);
   });
+
+  // it.skip('mdlinks should resolve if absolute path exists', () => {
+  //   const absolutePath = '/absolute/path.md';
+  //   path.resolve.mockReturnValue(absolutePath);
+  //   fs.existsSync.mockReturnValue(true);
+  //   return expect(mdlinks(thePath)).resolves.toBe(absolutePath);
+  // });
 
   it.skip('should resolve with the file data when file is valid without links', () => {
     expect.assertions(1);

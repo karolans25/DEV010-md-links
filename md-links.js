@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-// const markdownIt = require('markdown-it');
+const markdownIt = require('markdown-it');
 
 const fsP = fs.promises;
 const { existsSync } = fs;
@@ -9,7 +9,7 @@ const readFile = fsP;
 // const { stat } = fsP;
 // const { access } = fsP;
 // const { constants } = fsP;
-// const md = markdownIt({ linkify: true });
+const md = markdownIt({ linkify: true });
 
 const markDownExtensions = [
   '.md', '.mkd', '.mdwn', '.mdown', '.mdtxt', '.mdtext', '.markdown', '.text',
@@ -25,47 +25,53 @@ const markDownExtensions = [
 //   })
 //   .catch((err) => err);
 
-// const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, reject) => {
-//   try {
-//     const links = [];
-//     const html = md.render(text);
-//     const lines = html.split('\n');
-//     const max = lines.length;
-//     for (let i = 0; i < max; i++) {
-//       const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
-//       let match;
-//       while ((match = regex.exec(lines[i])) !== null) {
-//         const link = {
-//           href: match[2],
-//           text: match[3],
-//           file: filePath,
-//           line: parseInt(i, 10) + 1,
-//         };
-//         links.push(link);
-//       }
-//     }
-//     if (validate) {
-//       const linksVerified = links.map((link) => verifyUrl(link.href)
-//         .then((res) => {
-//           link.status = res.status;
-//           link.ok = res.ok;
-//           return link;
-//         }));
+const getLinksFromHtml = (filePath, text) => new Promise((resolve, reject) => {
+  try {
+    const links = [];
+    const html = md.render(text);
+    const lines = html.split('\n');
+    const max = lines.length;
+    for (let i = 0; i < max; i++) {
+      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
+      let match;
+      while ((match = regex.exec(lines[i])) !== null) {
+        const link = {
+          href: match[2],
+          text: match[3],
+          file: filePath,
+          line: parseInt(i, 10) + 1,
+        };
+        links.push(link);
+      }
+    }
+    // if (validate) {
+    //   const linksVerified = links.map((link) => verifyUrl(link.href)
+    //     .then((res) => {
+    //       link.status = res.status;
+    //       link.ok = res.ok;
+    //       return link;
+    //     }));
 
-//       Promise.all(linksVerified).then((result) => {
-//         resolve(result);
-//       });
-//     } else {
-//       resolve(links);
-//     }
-//   } catch (err) {
-//     reject(new Error(err.message));
-//   }
-// });
+    //   Promise.all(linksVerified).then((result) => {
+    //     resolve(result);
+    //   });
+    // } else {
+    resolve(links);
+    // }
+  } catch (err) {
+    reject(new Error(err.message));
+  }
+});
 
 const readAFile = (file) => readFile(file, 'utf8')
-  .then((markdown) => markdown)
-  .catch((err) => err);
+  .then((markdown) => {
+    console.log(markdown);
+    return markdown;
+  })
+  .catch((err) => {
+    console.log(err);
+    return err;
+  });
 
 const fileExists = (filePath) => existsSync(filePath);
 
@@ -89,10 +95,10 @@ const mdlinks = (thePath) => new Promise((resolve, reject) => {
   }
   readAFile(absolutePath)
     .then((text) => {
-      console.log(text);
-      resolve(absolutePath);
-      // const links = getLinksFromHtml(absolutePath, text, validate);
-      // resolve(links);
+      // console.log(text);
+      // resolve(absolutePath);
+      const links = getLinksFromHtml(absolutePath, text);
+      resolve(links);
     })
     .catch((err) => reject(err));
 });
