@@ -16,14 +16,14 @@ const verifyUrl = (url) => fetch(url)
     const data = {
       status: (typeof res.status === 'undefined') ? 404 : res.status,
       ok: (typeof res.statusText === 'undefined') ? 'fail' : res.statusText.toLowerCase(),
-    }
+    };
     return data;
   })
   .catch((err) => {
     const data = {
       status: 500,
       ok: 'fail',
-    }
+    };
     return data;
     console.log(err);
   });
@@ -61,8 +61,8 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
     } else {
       resolve(links);
     }
-  } catch (err){
-    reject(new Error (err.message));
+  } catch (err) {
+    reject(err);
   }
 });
 
@@ -83,21 +83,23 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
       .then(() => {
         const splitPath = absolutePath.split('/');
         const splitExt = splitPath.pop().split('.');
-        if (splitExt.length <= 1 || splitExt[splitExt.length - 1] === '') {
-          reject(new Error('It\'s a directory or invalid extension'));
+        if (splitExt.length <= 1) {
+          reject(new Error('It\'s a directory'));
         }
         const ext = `.${splitExt.pop()}`;
-        if (!markDownExtensions.includes(ext)) {
-          reject(new Error('File is not a markdown file'));
+        if (splitExt[splitExt.length - 1] === '' && !markDownExtensions.includes(ext)) {
+          reject(new Error('Path is not a markdown file'));
         }
         readAFile(absolutePath)
           .then((text) => {
             const links = getLinksFromHtml(absolutePath, text, validate);
             resolve(links);
           })
-          .catch((err) => reject(new Error('Couldn\'t read the file')));
+          // .catch((err) => reject(new Error('Couldn\'t read the file')));
+          .catch((err) => reject(err));
       })
-      .catch((err) => reject(new Error('No such file or directory')));
+      // .catch((err) => reject(new Error('No such file or directory')));
+      .catch((err) => reject(err));
   } catch (err) {
     reject(new Error(err.message));
   }
@@ -108,11 +110,11 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/example.txt';
 // const thePath = './some/';
 // const thePath = './some/example.md';
-// const thePath = './some/example1.md';
-// mdlinks(thePath, true)
-//   .then((res) => console.log(res))
-//   .catch((err) => console.log(err.message));
-// mdlinks(thePath, false)
+const thePath = './some/example1.md';
+mdlinks(thePath, true)
+  .then((res) => console.log(res))
+  .catch((err) => console.log(err.message));
+// mdlinks(thePath)
 //   .then((res) => console.log(res))
 //   .catch((err) => console.log(err.message));
 

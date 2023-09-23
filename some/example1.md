@@ -4,7 +4,7 @@
 
 ## 1. Preámbulo
 
-[Markdown](https://es.wikipedia.org/wiki/Markdownxxxx) es un lenguaje de marcado
+[Markdown](https://es.wikipedia.org/wiki/Markdownx) es un lenguaje de marcado
 ligero muy popular entre developers. Es usado en
 muchísimas plataformas que manejan texto plano (GitHub, foros, blogs, etc.) y
 es muy común encontrar varios archivos en ese formato en cualquier tipo de
