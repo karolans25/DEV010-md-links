@@ -17,7 +17,7 @@ if (args.length === 1) {
     // console.table(res.map((item) => ({ path: args[0], href: item.href, text: item.text })));
     res.forEach((element) => {
       const file = `${args[0]}${element.file.split(arg)[1]}`;
-      console.log('%s\t%s\t%s', file, element.href, element.text);
+      console.log('%s\t%s\t%s', file, element.href, element.text.substr(0, 49));
     });
   }).catch(() => console.log('Error'));
 } else if (args[1] === '--validate' && args.length === 2) {
@@ -26,9 +26,9 @@ if (args.length === 1) {
       const file = `${args[0]}${element.file.split(arg)[1]}`;
       if (element.ok === 'ok') {
         // console.log('%s\t%s\t%s', file, element.href, element.text);
-        console.log(`${file}\t${element.href}\t%c${element.ok} ${element.status}\t${element.text}`, 'color:green');
+        console.log('%s\t%s\t%s\t%s', file, element.href, `${element.ok} ${element.status}`, element.text.substr(0, 49));
       } else {
-        console.log(`${file}\t${element.href}\t%c${element.ok} ${element.status}\t${element.text}`, 'color:red');
+        console.log('%s\t%s\t%s\t%s', file, element.href, `${element.ok} ${element.status}`, element.text.substr(0, 49));
       }
     });
   }).catch(() => console.log('Error'));
