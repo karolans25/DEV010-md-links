@@ -3,8 +3,8 @@ const path = require('path');
 const markdownIt = require('markdown-it');
 
 // const { access } = fs.promises;
+// const { constants } = fs.promises;
 const { stat } = fs.promises;
-const { constants } = fs.promises;
 const { readFile } = fs.promises;
 const { readdirSync } = fs;
 const md = markdownIt({ linkify: true });
@@ -21,7 +21,7 @@ const verifyUrl = (url) => fetch(url)
     };
     return data;
   })
-  .catch((err) => {
+  .catch(() => {
     const data = {
       status: 500,
       ok: 'fail',
@@ -36,8 +36,12 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
     const lines = html.split('\n');
     const max = lines.length;
     for (let i = 0; i < max; i++) {
-      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
+      // const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
+      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(?!#)(.*?)\1>(.*?)<\/a>/g;
+
       let match;
+      // Theorically it's ok, check this links:
+      // https://eslint.org/docs/latest/rules/no-cond-assigns
       while ((match = regex.exec(lines[i])) !== null) {
         const link = {
           href: match[2],
@@ -64,7 +68,7 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
       resolve(links);
     }
   } catch (err) {
-    reject(new Error(err.message));
+    reject(err);
   }
 });
 
@@ -74,7 +78,7 @@ const fileExists = (filePath) => stat(filePath)
 
 const readAFile = (file) => readFile(file, 'utf8')
   .then((markdown) => markdown)
-  .catch((err) => new Error(err.message));
+  .catch((err) => err);
 
 const checkExtension = (fileNameArray) => {
   if (!(fileNameArray.length > 1)) {
@@ -90,11 +94,11 @@ const checkExtension = (fileNameArray) => {
 const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
   try {
     if (typeof thePath !== 'string' || thePath === '') {
-      reject(new TypeError('The path is invalid'));
+      reject(new TypeError({ message: 'The path is invalid' }));
     }
     const absolutePath = path.resolve(thePath);
     if (!fileExists(absolutePath)) {
-      reject(new Error('No such file or directory'));
+      reject(new Error({ message: 'No such file or directory' }));
     }
     let links = [];
     const splitPath = absolutePath.split('/');
@@ -125,7 +129,7 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
     } else { // It's a file
       const isMd = checkExtension(splitExt);
       if (!isMd) {
-        reject(new Error('File extension is not a markdown type'));
+        reject(new Error({ message: 'File extension is not a markdown type' }));
       }
       readAFile(absolutePath)
         .then((text) => {
@@ -134,31 +138,8 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
         })
         .catch((err) => reject(err));
     }
-
-    // LS DIR
-    // const fs = require('fs');
-
-    // const directoryPath = './path/to/directory';
-    // const files = fs.readdirSync(directoryPath);
-
-    // files.forEach((file) => {
-    //   console.log(file);
-    // });
-
-    // JOIN ROUTES
-    // const path = require('path');
-
-    // const route1 = '/users';
-    // const route2 = '/profile';
-
-    // const joinedRoute = path.join(route1, route2);
-
-    // console.log(joinedRoute);
-    // })
-    // .catch((err) => reject(new Error('No such file or directory')));
-    // .catch((err) => reject(new Error(err.message)));
   } catch (err) {
-    reject(new Error(err.message));
+    reject(new Error({ message: err.message }));
   }
 });
 
@@ -168,10 +149,11 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/example.txt';
 // const thePath = './some/example.md';
 // const thePath = './some/example1.md';
-const thePath = './some/';
-mdlinks(thePath, true)
-  .then((res) => console.log(res))
-  .catch((err) => console.log(err.message));
+// const thePath = './README.md';
+// const thePath = './some/';
+// mdlinks(thePath, true)
+//   .then((res) => console.log(res, res.length))
+//   .catch((err) => console.log(err.message));
 // mdlinks(thePath)
 //   .then((res) => console.log(res))
 //   .catch((err) => console.log(err.message));
