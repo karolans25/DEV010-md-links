@@ -1,0 +1,184 @@
+[33mcommit 02f0cd59bd848ba10da6de671ba5ccc96d62ed79[m[33m ([m[1;36mHEAD -> [m[1;32m2-checkArgValidate[m[33m, [m[1;31morigin/2-checkArgValidate[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sun Sep 24 03:15:18 2023 -0500
+
+    Prints the info without green/red color
+
+[33mcommit 228cf2db12bc5ee15d267be794556421cfa3b969[m[33m ([m[1;31morigin/1-createCLI[m[33m, [m[1;32m1-createCLI[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sun Sep 24 02:16:23 2023 -0500
+
+    CLI created without extra args
+
+[33mcommit b614a322a6d3f0d31c3098cd400e673add88926c[m[33m ([m[1;31morigin/milestone4[m[33m, [m[1;31morigin/milestone3[m[33m, [m[1;31morigin/1-lsDir[m[33m, [m[1;32mmilestone4[m[33m, [m[1;32mmilestone3[m[33m, [m[1;32m1-lsDir[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 23 23:58:59 2023 -0500
+
+    change access for stat to check if the file exists
+
+[33mcommit 64269b01835ed379a99259982b6cad306ecdf600[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 23 23:47:35 2023 -0500
+
+    Change the example2.md content
+
+[33mcommit 0cfcd15fe4d2593236e01bf8ba12d599056fa175[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 23 16:50:54 2023 -0500
+
+    read a dir and get the links of its mdFiles
+
+[33mcommit dbae4ac3777d0eaf52b42d86b942660b0cccf57c[m[33m ([m[1;31morigin/1-validateLinks[m[33m, [m[1;32m1-validateLinks[m[33m)[m
+Merge: 1f8e1fa 6aa0cea
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 23 13:29:34 2023 -0500
+
+    validate links with fetch
+
+[33mcommit 6aa0ceaf9a1670e393fe020eca688e296a0f7c0d[m[33m ([m[1;31morigin/7-UTmilestone-1[m[33m, [m[1;32m7-UTmilestone-1[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Tue Sep 19 19:18:28 2023 -0500
+
+    not ready mock of readFile
+
+[33mcommit fa9f631a1943235bfc7f1e5c992f19fecd8a8bf6[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Tue Sep 19 14:45:13 2023 -0500
+
+    Refactoring the algorithm for the test
+
+[33mcommit 1f8e1fa33c96cb6b7688071f9c0f303dab4d4efa[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sun Sep 17 18:12:25 2023 -0500
+
+    email validated
+
+[33mcommit f008c920df8e55078521bd78516d500891d914ab[m[33m ([m[1;31morigin/milestone1[m[33m, [m[1;31morigin/2-UTmilestone2[m[33m, [m[1;32mmilestone1[m[33m)[m
+Merge: 0c07ece 5cbd844
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 23:49:05 2023 -0500
+
+    Merge pull request #15 from karolans25/7-UTmilestone-1
+    
+    It's better try to mock access, readFile, path.resolve
+
+[33mcommit 5cbd8442515ff5d75a29a9f80c0d566bf6409bdd[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 23:41:15 2023 -0500
+
+    Tests done with assertions
+
+[33mcommit 0c07ece8b3d658288467db0aea83ae9812f6b555[m
+Merge: 39800e1 b0fedd0
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 22:43:17 2023 -0500
+
+    Merge pull request #14 from karolans25/6-findLinks
+    
+    6 find links
+
+[33mcommit b0fedd0c13471cbe5621d3deef48114a5fe0517f[m[33m ([m[1;31morigin/6-findLinks[m[33m, [m[1;32m6-findLinks[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 22:33:50 2023 -0500
+
+    find links of a file
+
+[33mcommit e9639837741ba9be131d71972da7b7a5c8e34987[m
+Merge: 39800e1 ac46bed
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 22:27:25 2023 -0500
+
+    Merge branch '5-readAFile' of github.com:karolans25/DEV010-md-links into 6-findLinks
+
+[33mcommit ac46bed986e53b17fe274640b616475c8c5bd9e4[m[33m ([m[1;31morigin/5-readAFile[m[33m, [m[1;32m5-readAFile[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 22:26:06 2023 -0500
+
+    get Link from a url
+
+[33mcommit 39800e12718a0646063ec347ccd4ad47ac22dde5[m
+Merge: 2f4440f e31ca38
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 21:55:24 2023 -0500
+
+    Merge pull request #13 from karolans25/5-readAFile
+    
+    read a file
+
+[33mcommit e31ca38e455bf262c57739508a59414258b17699[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 21:49:56 2023 -0500
+
+    read a fike
+
+[33mcommit 2f4440fb257a8b19bf784e07037a1ff591a27863[m
+Merge: 03582a3 9fb75b5
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 21:06:23 2023 -0500
+
+    Merge pull request #12 from karolans25/4-checkExt
+    
+    Chek if the file is markdown
+
+[33mcommit 9fb75b54330eae6a0b35d3ea29e4910da219e8c5[m[33m ([m[1;31morigin/4-checkExt[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 20:57:55 2023 -0500
+
+    Chek if the file is markdown
+
+[33mcommit 03582a374394aa9161178f74a7ed634b73777c07[m
+Merge: 1550751 d1e06c9
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 18:41:32 2023 -0500
+
+    Merge pull request #10 from karolans25/3-checkRouteExists
+    
+    Check if the path exists
+
+[33mcommit d1e06c95085d62250e9bd7b21b53944af582bedb[m[33m ([m[1;31morigin/3-checkRouteExists[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 18:35:46 2023 -0500
+
+    Check if the path exists
+
+[33mcommit 1550751018be76f7403f50cc032960f8ff720909[m
+Merge: ac97a74 d679031
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 08:03:12 2023 -0500
+
+    Merge pull request #9 from karolans25/2-transformpath
+    
+    transform path into an absolute path
+
+[33mcommit d679031d7959e57dee94d397082ec1ab5c68e259[m[33m ([m[1;31morigin/2-transformpath[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 07:58:01 2023 -0500
+
+    transform path into an absolute path
+
+[33mcommit ac97a742f39dccf535bcdbb996fc8aa4834b1ea6[m[33m ([m[1;31morigin/2-transform-the-entered-path-to-absolute[m[33m)[m
+Merge: b8ab240 0dc1cbc
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 06:37:23 2023 -0500
+
+    Merge pull request #8 from karolans25/1-create-a-promise
+    
+    promise created
+
+[33mcommit 0dc1cbca2b1e34ed261fe8ec68478f2c420ce9af[m[33m ([m[1;31morigin/1-create-a-promise[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 06:32:45 2023 -0500
+
+    promise created
+
+[33mcommit b8ab240f649eb4a6f575dc64a63ea7d807836f0f[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Author: Carolina Pulido Gómez <priyacarito@gmail.com>
+Date:   Sat Sep 16 05:30:35 2023 -0500
+
+    Create node.js.yml
+
+[33mcommit 9f525d44bbd718dee1cf34925f433e68a28bcbf5[m
+Author: Génesis Mauries <exodo_54@hotmail.com>
+Date:   Mon Sep 4 12:43:43 2023 -0600
+
+    chore(init): Adds project files from curriculum

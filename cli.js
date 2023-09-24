@@ -11,21 +11,24 @@ const { mdlinks } = require('./md-links');
 // const [, , ...args] = process.argv;
 const args = process.argv.splice(2);
 
+const arg = args[0].split('').splice(1).join('');
 if (args.length === 1) {
   mdlinks(args[0]).then((res) => {
     // console.table(res.map((item) => ({ path: args[0], href: item.href, text: item.text })));
     res.forEach((element) => {
-      console.log('%s\t%s\t%s', args[0], element.href, element.text);
+      const file = `${args[0]}${element.file.split(arg)[1]}`;
+      console.log('%s\t%s\t%s', file, element.href, element.text);
     });
   }).catch(() => console.log('Error'));
 } else if (args[1] === '--validate' && args.length === 2) {
   mdlinks(args[0], true).then((res) => {
     res.forEach((element) => {
+      const file = `${args[0]}${element.file.split(arg)[1]}`;
       if (element.ok === 'ok') {
-        // console.log(`${args[0]}\t${element.href}\t${chalk.green(`${element.ok} ${element.status}`)}\t${element.text}`, 'color:green');
-        console.log(`${args[0]}\t${element.href}\t${element.ok} ${element.status}\t${element.text}`, 'color:green');
+        // console.log('%s\t%s\t%s', file, element.href, element.text);
+        console.log(`${file}\t${element.href}\t%c${element.ok} ${element.status}\t${element.text}`, 'color:green');
       } else {
-        console.log('%s\t%s\t%s', args[0], element.href, `${element.ok} ${element.status}`, element.text);
+        console.log(`${file}\t${element.href}\t%c${element.ok} ${element.status}\t${element.text}`, 'color:red');
       }
     });
   }).catch(() => console.log('Error'));

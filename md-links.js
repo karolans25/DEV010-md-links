@@ -116,7 +116,7 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
       });
       links = mdFiles.map((route) => readAFile(route)
         .then((text) => {
-          links = getLinksFromHtml(absolutePath, text, validate);
+          links = getLinksFromHtml(route, text, validate);
           return links;
         })
         .catch((err) => reject(err)));
