@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const markdownIt = require('markdown-it');
 
-const { access } = fs.promises;
+// const { access } = fs.promises;
+const { stat } = fs.promises;
 const { constants } = fs.promises;
 const { readFile } = fs.promises;
 const { readdirSync } = fs;
@@ -67,7 +68,8 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
   }
 });
 
-const fileExists = (filePath) => access(filePath, constants.F_OK);
+const fileExists = (filePath) => stat(filePath)
+  .then(() => true).catch(() => false);
 // .catch((err) => reject(new Error(err.message)));
 
 const readAFile = (file) => readFile(file, 'utf8')
@@ -91,69 +93,70 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
       reject(new TypeError('The path is invalid'));
     }
     const absolutePath = path.resolve(thePath);
-    fileExists(absolutePath)
-      .then(() => {
-        let links = [];
-        const splitPath = absolutePath.split('/');
-        const splitExt = splitPath.pop().split('.');
-        if (splitExt.length <= 1) { // It's a directory
-          const files = readdirSync(absolutePath);
-          const mdFiles = [];
-          files.forEach((file) => {
-            const fileNameArray = file.split('.');
-            const isMd = checkExtension(fileNameArray);
-            if (isMd) {
-              const joinedRoute = path.join(absolutePath, file);
-              mdFiles.push(joinedRoute);
-            }
-          });
-          links = mdFiles.map((route) => readAFile(route)
-            .then((text) => {
-              links = getLinksFromHtml(absolutePath, text, validate);
-              return links;
-            })
-            .catch((err) => reject(err)));
-          Promise.all(links).then((result) => {
-            resolve(result.flat());
-          });
-        } else { // It's a file
-          // const ext = `.${splitExt.pop()}`;
-          const isMd = checkExtension(splitExt);
-          // if (splitExt[splitExt.length - 1] === '' && !markDownExtensions.includes(ext)) {
-          if (!isMd) {
-            reject(new Error('File extension is not a markdown type'));
-          }
-          readAFile(absolutePath)
-            .then((text) => {
-              links = getLinksFromHtml(absolutePath, text, validate);
-              resolve(links);
-            })
-            // .catch((err) => reject(new Error('Couldn\'t read the file')));
-            .catch((err) => reject(err));
+    if (!fileExists(absolutePath)) {
+      reject(new Error('No such file or directory'));
+    }
+    let links = [];
+    const splitPath = absolutePath.split('/');
+    const splitExt = splitPath.pop().split('.');
+    if (splitExt.length <= 1) { // It's a directory
+      const files = readdirSync(absolutePath);
+      const mdFiles = [];
+      files.forEach((file) => {
+        const fileNameArray = file.split('.');
+        const isMd = checkExtension(fileNameArray);
+        if (isMd) {
+          const joinedRoute = path.join(absolutePath, file);
+          mdFiles.push(joinedRoute);
         }
+      });
+      links = mdFiles.map((route) => readAFile(route)
+        .then((text) => {
+          links = getLinksFromHtml(absolutePath, text, validate);
+          return links;
+        })
+        .catch((err) => reject(err)));
+      Promise.all(links).then((result) => {
+        resolve(result.flat());
+      });
+      // Pending recursivity through subdirectories
+      // That implies some changes into the checkExt or check and call the
+      // mdlinks function before invoke the checkExt function
+    } else { // It's a file
+      const isMd = checkExtension(splitExt);
+      if (!isMd) {
+        reject(new Error('File extension is not a markdown type'));
+      }
+      readAFile(absolutePath)
+        .then((text) => {
+          links = getLinksFromHtml(absolutePath, text, validate);
+          resolve(links);
+        })
+        .catch((err) => reject(err));
+    }
 
-        // LS DIR
-        // const fs = require('fs');
+    // LS DIR
+    // const fs = require('fs');
 
-        // const directoryPath = './path/to/directory';
-        // const files = fs.readdirSync(directoryPath);
+    // const directoryPath = './path/to/directory';
+    // const files = fs.readdirSync(directoryPath);
 
-        // files.forEach((file) => {
-        //   console.log(file);
-        // });
+    // files.forEach((file) => {
+    //   console.log(file);
+    // });
 
-        // JOIN ROUTES
-        // const path = require('path');
+    // JOIN ROUTES
+    // const path = require('path');
 
-        // const route1 = '/users';
-        // const route2 = '/profile';
+    // const route1 = '/users';
+    // const route2 = '/profile';
 
-        // const joinedRoute = path.join(route1, route2);
+    // const joinedRoute = path.join(route1, route2);
 
-        // console.log(joinedRoute);
-      })
-      // .catch((err) => reject(new Error('No such file or directory')));
-      .catch((err) => reject(new Error(err.message)));
+    // console.log(joinedRoute);
+    // })
+    // .catch((err) => reject(new Error('No such file or directory')));
+    // .catch((err) => reject(new Error(err.message)));
   } catch (err) {
     reject(new Error(err.message));
   }
