@@ -57,7 +57,7 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
         .then((res) => {
           link.status = res.status;
           // link.ok = res.ok;
-          link.ok = (res.status === 200) ? res.ok : 'failed';
+          link.ok = (res.ok === 'ok') ? res.ok : 'failed';
           return link;
         }));
 
