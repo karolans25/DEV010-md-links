@@ -33,7 +33,6 @@ if (args.length === 1) {
     });
   }).catch(() => console.log('Error'));
 } else if (args[1] === '--stats') {
-  // mdlinks(args[0], true).then((res) => console.log(res, res.length));
   mdlinks(args[0]).then((res) => {
     console.log('\nTotal: ', res.length);
     const links = [];
@@ -45,5 +44,19 @@ if (args.length === 1) {
     console.log('Unique: ', links.length, '\n');
   }).catch(() => console.log('Error'));
 } else {
-  console.log('validate and stats');
+  let broken = 0;
+  mdlinks(args[0], true).then((res) => {
+    console.log('\nTotal: ', res.length);
+    const links = [];
+    res.forEach((element) => {
+      if (!links.includes(element.href)) {
+        links.push(element.href);
+      }
+      if (element.ok === 'failed') {
+        broken += 1;
+      }
+    });
+    console.log('Unique: ', links.length);
+    console.log('Broken: ', broken, '\n');
+  }).catch(() => console.log('Error'));
 }

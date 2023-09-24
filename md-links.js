@@ -37,7 +37,8 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
     const max = lines.length;
     for (let i = 0; i < max; i++) {
       // const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
-      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(?!#)(.*?)\1>(.*?)<\/a>/g;
+      // const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(?!#)(.*?)\1>(.*?)<\/a>/g;
+      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(?!\.\/|#)(.*?)\1>(.*?)<\/a>/g;
 
       let match;
       // Theorically it's ok, check this links:
