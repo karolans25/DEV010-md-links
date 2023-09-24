@@ -34,7 +34,16 @@ if (args.length === 1) {
   }).catch(() => console.log('Error'));
 } else if (args[1] === '--stats') {
   // mdlinks(args[0], true).then((res) => console.log(res, res.length));
-  console.log('stats');
+  mdlinks(args[0]).then((res) => {
+    console.log('\nTotal: ', res.length);
+    const links = [];
+    res.forEach((element) => {
+      if (!links.includes(element.href)) {
+        links.push(element.href);
+      }
+    });
+    console.log('Unique: ', links.length, '\n');
+  }).catch(() => console.log('Error'));
 } else {
   console.log('validate and stats');
 }
