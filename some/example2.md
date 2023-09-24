@@ -1,22 +1,28 @@
-# Markdown Links
+## 2. Resumen del proyecto
 
-## Índice
+En este proyecto desarrollarás una librería en Node.js que funcionará como
+herramienta para analizar links dentro de archivos Markdown. Esta librería
+estará disponible de dos formas: como un módulo publicado en GitHub, que las
+usuarias podrán instalar e importar en otros proyectos, y como una interfaz
+de línea de comandos (CLI) que permitirá utilizar la librería directamente
+desde el terminal.
 
-## 1. Preámbulo
+[Node.js](https://nodejs.org/es/) es un entorno de ejecución para JavaScript
+construido con el [motor de JavaScript V8 de Chrome](https://developers.google.com/v8/).
+Esto nos va a permitir ejecutar JavaScript en el entorno del sistema operativo,
+ya sea tu máquina o un servidor, lo cual nos abre las puertas para poder
+interactuar con el sistema en sí, archivos, redes, etc.
 
-[Markdown](https://es.wikipedia.org/wiki/Markdownx) es un lenguaje de marcado
-ligero muy popular entre developers. Es usado en
-muchísimas plataformas que manejan texto plano (GitHub, foros, blogs, etc.) y
-es muy común encontrar varios archivos en ese formato en cualquier tipo de
-repositorio (empezando por el tradicional `README.md`).
+En esta oportunidad nos alejamos un poco del navegador para construir una
+librería que interactua con el sistema archivos y un script que se ejecute
+usando Node.js. Aprenderemos cómo buscar y leer archivos, cómo hacer consultas
+de red, sobre procesos (`process.env`, `process.argv`, ...), etc.
 
-Estos archivos `Markdown` normalmente contienen _links_ (vínculos/ligas) que
-muchas veces están rotos o ya no son válidos y eso perjudica mucho el valor de
-la información que se quiere compartir.
-
-Dentro de una comunidad de código abierto, nos han propuesto crear una
-herramienta usando [Node.js](https://nodejs.org/), que lea y analice archivos
-en formato `Markdown`, para verificar los links que contengan y reportar
-algunas estadísticas.
-
-![md-links](https://github.com/Laboratoria/bootcamp/assets/12631491/fc6bc380-7824-4fab-ab8f-7ab53cd9d0e4)
+Diseñar tu propia librería es una experiencia fundamental para cualquier
+desarrolladora porque que te obliga a pensar en la interfaz (API) de tus
+_módulos_ y cómo será usado por otras developers. Debes tener especial
+consideración en peculiaridades del lenguaje, convenciones y buenas prácticas.
+Al finalizar, podrás instalar esta librería utilizando NPM (Node Package
+Manager), que facilita la búsqueda e instalación de librerías de Node a
+través de su registro y también de GitHub. Una vez que hayas subido la
+librería a tu repositorio público, será accesible para otras developers.
