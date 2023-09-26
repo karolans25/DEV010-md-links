@@ -2,7 +2,7 @@ const DATA_RESULT = '[{"file":"/home/karolans/Documents/Github/Laboratoria/Bootc
 
 const path = require('path');
 const fs = require('fs');
-const fsP = require('fs/promises');
+const fsP = require('fs').promises;
 // const readFile = require('fs').promises;
 const { mdlinks } = require('../md-links');
 
@@ -88,15 +88,67 @@ describe('mdLinks', () => {
     return expect(mdlinks(thePath)).rejects.toThrow(Error);
   });
 
+  it.only('readFile', async () => {
+    const expectedContents = '# Example\nThis is an example';
+    fsP.readFile = jest.fn().mockResolvedValue(expectedContents);
+    const result = await fsP.readFile();
+    expect(result).toBe(expectedContents);
+  });
+
+  jest.spyOn(fsP, 'readFile');
+
+  it.only('should resolve if file is read', async () => {
+    const absolutePath = '/absolute/path.md';
+    path.resolve.mockReturnValue(absolutePath);
+    fs.existsSync.mockReturnValue(true);
+    const expectedContents = '# Example\nThis is an example';
+    // jest.spyOn(fsP, 'readFile').mockImplementation(() => Promise.resolve(expectedContents));
+    // jest.spyOn(fsP, 'readFile').mockResolvedValue(expectedContents);
+    // fsP.readFile = jest.fn().mockResolvedValue(expectedContents);
+    fsP.readFile.mockResolvedValue(expectedContents);
+    const result = await mdlinks(absolutePath);
+    expect(result).toBe([]);
+    expect(fs.readFile).toHaveBeenCalledWith(absolutePath, 'utf8');
+  });
+
+  test('Debería resolver la promesa con el contenido del archivo', () => {
+    const absolutePath = '/absolute/path.md';
+    path.resolve.mockReturnValue(absolutePath);
+    fs.existsSync.mockReturnValue(true);
+    const expectedContents = '# Example\nThis is an example';
+
+    fsP.readFile = jest.fn().mockImplementation((file, encoding, callback) => {
+      callback(null, expectedContents);
+    });
+
+    return mdlinks('archivo.md').then((result) => {
+      expect(result).toBe(expectedContents);
+    });
+  });
+
   it('should resolve if file is read', () => {
     const absolutePath = '/absolute/path.md';
     path.resolve.mockReturnValue(absolutePath);
     fs.existsSync.mockReturnValue(true);
     const expectedContents = '# Example\nThis is an example';
-    // fs.promises.readFile.jest.fn().mockResolvedValue(expectedContents);
-    fsP.readFile = jest.fn();
-    fsP.readFile.mockResolvedValue(expectedContents);
-    return expect(mdlinks(thePath)).resolves.toBe(absolutePath);
+    fsP.readFile = jest.fn().mockResolvedValue(expectedContents);
+
+    // const mockMarkdown = 'Contenido del archivo markdown';
+    return mdlinks('archivo.md').then((result) => {
+      expect(result).toBe(expectedContents);
+    });
+  });
+
+  it('Debería rechazar la promesa en caso de error en readFile', () => {
+    const mockError = new Error('Error simulado');
+
+    fs.readFile.mockImplementation((file, encoding, callback) => {
+      callback(mockError, null);
+    });
+
+    return mdlinks('archivo.md').catch((error) => {
+      expect(error).toBe(mockError);
+    });
   });
 
   // it.skip('mdlinks should resolve if absolute path exists', () => {

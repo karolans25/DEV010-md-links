@@ -4,7 +4,7 @@ const markdownIt = require('markdown-it');
 
 const fsP = fs.promises;
 const { existsSync } = fs;
-const readFile = fsP;
+const { readFile } = fsP;
 // fsP.existsSync;
 // const { stat } = fsP;
 // const { access } = fsP;
@@ -26,41 +26,37 @@ const markDownExtensions = [
 //   .catch((err) => err);
 
 const getLinksFromHtml = (filePath, text) => new Promise((resolve, reject) => {
-  try {
-    const links = [];
-    const html = md.render(text);
-    const lines = html.split('\n');
-    const max = lines.length;
-    for (let i = 0; i < max; i++) {
-      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
-      let match;
-      while ((match = regex.exec(lines[i])) !== null) {
-        const link = {
-          href: match[2],
-          text: match[3],
-          file: filePath,
-          line: parseInt(i, 10) + 1,
-        };
-        links.push(link);
-      }
+  const links = [];
+  const html = md.render(text);
+  const lines = html.split('\n');
+  const max = lines.length;
+  for (let i = 0; i < max; i++) {
+    const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
+    let match;
+    while ((match = regex.exec(lines[i])) !== null) {
+      const link = {
+        href: match[2],
+        text: match[3],
+        file: filePath,
+        line: parseInt(i, 10) + 1,
+      };
+      links.push(link);
     }
-    // if (validate) {
-    //   const linksVerified = links.map((link) => verifyUrl(link.href)
-    //     .then((res) => {
-    //       link.status = res.status;
-    //       link.ok = res.ok;
-    //       return link;
-    //     }));
-
-    //   Promise.all(linksVerified).then((result) => {
-    //     resolve(result);
-    //   });
-    // } else {
-    resolve(links);
-    // }
-  } catch (err) {
-    reject(new Error(err.message));
   }
+  // if (validate) {
+  //   const linksVerified = links.map((link) => verifyUrl(link.href)
+  //     .then((res) => {
+  //       link.status = res.status;
+  //       link.ok = res.ok;
+  //       return link;
+  //     }));
+
+  //   Promise.all(linksVerified).then((result) => {
+  //     resolve(result);
+  //   });
+  // } else {
+  resolve(links);
+  // }
 });
 
 const readAFile = (file) => readFile(file, 'utf8')
@@ -84,13 +80,11 @@ const mdlinks = (thePath) => new Promise((resolve, reject) => {
   if (!exists) {
     reject(new Error('No such file or directory'));
   }
-  const splitPath = absolutePath.split('/');
-  const splitExt = splitPath.pop().split('.');
-  if (splitExt.length <= 1) {
+  const extension = path.extname(absolutePath);
+  if (extension === '') {
     reject(new Error('It\'s a directory'));
   }
-  const ext = `.${splitExt.pop()}`;
-  if (ext !== '' && !markDownExtensions.includes(ext)) {
+  if (extension !== '' && !markDownExtensions.includes(extension)) {
     reject(new Error('File is not a markdown file'));
   }
   readAFile(absolutePath)
@@ -109,9 +103,10 @@ const mdlinks = (thePath) => new Promise((resolve, reject) => {
 // const thePath = './some/';
 // const thePath = './some/example.md';
 // const thePath = './some/example1.md';
-// mdlinks(thePath, false)
-//   .then((res) => console.log(res))
-//   .catch((err) => console.log(err.message));
+const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/README.md';
+mdlinks(thePath, false)
+  .then((res) => console.log(res))
+  .catch((err) => console.log(err.message));
 // mdlinks(thePath, true)
 //   .then((res) => console.log(res))
 //   .catch((err) => console.log(err.message));
