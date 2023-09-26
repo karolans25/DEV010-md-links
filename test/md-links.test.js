@@ -1,17 +1,11 @@
 // import { describe, expect, it } from '@jest/globals';
 // const path = require('path');
 // const fsPromises = require('fs/promises');
-const fetchMock = require('jest-fetch-mock');
 const { mdlinks } = require('../md-links');
 
 const DATA_RESULT = '[{"file":"/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/some/example1.md","href":"https://es.wikipedia.org/wiki/Markdownx","line":4,"text":"Markdown"},{"file":"/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/some/example1.md","href":"https://nodejs.org/","line":13,"text":"Node.js"}]';
 
 describe('mdLinks', () => {
-
-  beforeEach(() => {
-    fetchMock.resetMocks();
-  });
-
   it('should be a function', () => {
     expect(typeof mdlinks).toBe('function');
   });
