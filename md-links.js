@@ -120,9 +120,10 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/example1.md';
 // const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/some/example1.md';
 // const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/README.md';
+// const thePath = './some/';
 // mdlinks(thePath, true)
-//   .then((res) => console.log(res))
-//   .catch((err) => console.log(err.message));
+  // .then((res) => console.log(res))
+  // .catch((err) => console.log(err.message));
 
 module.exports = {
   mdlinks,
