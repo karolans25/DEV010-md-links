@@ -55,7 +55,7 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
       resolve(links);
     }
   } catch (err){
-    reject(new Error (err.message));
+    reject(err);
   }
 });
 
@@ -67,33 +67,28 @@ const readAFile = (file) => readFile(file, 'utf8')
   .catch((err) => new Error(err.message));
 
 const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
-  try {
-    if (typeof thePath !== 'string' || thePath === '') {
-      reject(new TypeError('The path is invalid'));
-    }
-    const absolutePath = path.resolve(thePath);
-    fileExists(absolutePath)
-      .then(() => {
-        const splitPath = absolutePath.split('/');
-        const splitExt = splitPath.pop().split('.');
-        if (splitExt.length <= 1 || splitExt[splitExt.length - 1] === '') {
-          reject(new Error('It\'s a directory or invalid extension'));
-        }
-        const ext = `.${splitExt.pop()}`;
-        if (!markDownExtensions.includes(ext)) {
-          reject(new Error('File is not a markdown file'));
-        }
-        readAFile(absolutePath)
-          .then((text) => {
-            const links = getLinksFromHtml(absolutePath, text, validate);
-            resolve(links);
-          })
-          .catch((err) => reject(new Error('Couldn\'t read the file')));
-      })
-      .catch((err) => reject(new Error('No such file or directory')));
-  } catch (err) {
-    reject(new Error(err.message));
+  if (typeof thePath !== 'string' || thePath === '') {
+    reject(new TypeError('The path is invalid'));
   }
+  const absolutePath = path.resolve(thePath);
+  fileExists(absolutePath)
+    .then(() => {
+      const extension = path.extname(absolutePath);
+      if (extension === ''){
+        reject(new Error('It\'s a directory'));
+      }
+      if (!markDownExtensions.includes(extension)) {
+        reject(new Error('File is not a markdown file'));
+      } else {
+      readAFile(absolutePath)
+        .then((text) => {
+          const links = getLinksFromHtml(absolutePath, text, validate);
+          resolve(links);
+        })
+        .catch((err) => reject(new Error('Couldn\'t read the file')));
+      }
+    })
+    .catch((err) => reject(new Error('No such file or directory')));
 });
 
 // const thePath = 200;
@@ -102,13 +97,11 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/';
 // const thePath = './some/example.md';
 // const thePath = './some/example1.md';
-
-// mdlinks(thePath, false)
-//   .then((res) => console.log(res))
-//   .catch((err) => console.log(err.message));
-// mdlinks(thePath, true)
-//   .then((res) => console.log(res))
-//   .catch((err) => console.log(err.message));
+// const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/some/example1.md';
+const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/README.md';
+mdlinks(thePath, true)
+  .then((res) => console.log(res))
+  .catch((err) => console.log(err.message));
 
 module.exports = {
   mdlinks,
