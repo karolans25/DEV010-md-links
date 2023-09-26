@@ -3,8 +3,8 @@ const path = require('path');
 const markdownIt = require('markdown-it');
 
 // const { access } = fs.promises;
+// const { constants } = fs.promises;
 const { stat } = fs.promises;
-const { constants } = fs.promises;
 const { readFile } = fs.promises;
 const { readdirSync } = fs;
 const md = markdownIt({ linkify: true });
@@ -63,8 +63,8 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
     } else {
       resolve(links);
     }
-  } catch (err) {
-    reject(new Error(err.message));
+  } catch (err){
+    reject(err);
   }
 });
 
@@ -88,78 +88,28 @@ const checkExtension = (fileNameArray) => {
 };
 
 const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
-  try {
-    if (typeof thePath !== 'string' || thePath === '') {
-      reject(new TypeError('The path is invalid'));
-    }
-    const absolutePath = path.resolve(thePath);
-    if (!fileExists(absolutePath)) {
-      reject(new Error('No such file or directory'));
-    }
-    let links = [];
-    const splitPath = absolutePath.split('/');
-    const splitExt = splitPath.pop().split('.');
-    if (splitExt.length <= 1) { // It's a directory
-      const files = readdirSync(absolutePath);
-      const mdFiles = [];
-      files.forEach((file) => {
-        const fileNameArray = file.split('.');
-        const isMd = checkExtension(fileNameArray);
-        if (isMd) {
-          const joinedRoute = path.join(absolutePath, file);
-          mdFiles.push(joinedRoute);
-        }
-      });
-      links = mdFiles.map((route) => readAFile(route)
-        .then((text) => {
-          links = getLinksFromHtml(absolutePath, text, validate);
-          return links;
-        })
-        .catch((err) => reject(err)));
-      Promise.all(links).then((result) => {
-        resolve(result.flat());
-      });
-      // Pending recursivity through subdirectories
-      // That implies some changes into the checkExt or check and call the
-      // mdlinks function before invoke the checkExt function
-    } else { // It's a file
-      const isMd = checkExtension(splitExt);
-      if (!isMd) {
-        reject(new Error('File extension is not a markdown type'));
+  if (typeof thePath !== 'string' || thePath === '') {
+    reject(new TypeError('The path is invalid'));
+  }
+  const absolutePath = path.resolve(thePath);
+  fileExists(absolutePath)
+    .then(() => {
+      const ext = path.extname(absolutePath);
+      if (ext === '') {
+        reject(new Error('It\'s a directory'));
+      }
+      if (!markDownExtensions.includes(ext)) {
+        reject(new Error('File is not a markdown file'));
       }
       readAFile(absolutePath)
         .then((text) => {
-          links = getLinksFromHtml(absolutePath, text, validate);
+          const links = getLinksFromHtml(absolutePath, text, validate);
           resolve(links);
         })
-        .catch((err) => reject(err));
-    }
+        .catch((err) => reject(new Error('Couldn\'t read the file')));
+    })
+    .catch((err) => reject(new Error('No such file or directory')));
 
-    // LS DIR
-    // const fs = require('fs');
-
-    // const directoryPath = './path/to/directory';
-    // const files = fs.readdirSync(directoryPath);
-
-    // files.forEach((file) => {
-    //   console.log(file);
-    // });
-
-    // JOIN ROUTES
-    // const path = require('path');
-
-    // const route1 = '/users';
-    // const route2 = '/profile';
-
-    // const joinedRoute = path.join(route1, route2);
-
-    // console.log(joinedRoute);
-    // })
-    // .catch((err) => reject(new Error('No such file or directory')));
-    // .catch((err) => reject(new Error(err.message)));
-  } catch (err) {
-    reject(new Error(err.message));
-  }
 });
 
 // const thePath = 200;
@@ -168,11 +118,9 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/example.txt';
 // const thePath = './some/example.md';
 // const thePath = './some/example1.md';
-const thePath = './some/';
-mdlinks(thePath, true)
-  .then((res) => console.log(res))
-  .catch((err) => console.log(err.message));
-// mdlinks(thePath)
+// const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/some/example1.md';
+// const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/README.md';
+// mdlinks(thePath, true)
 //   .then((res) => console.log(res))
 //   .catch((err) => console.log(err.message));
 
