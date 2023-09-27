@@ -1,42 +1,65 @@
-const fs = require('fs/promises');
+const fs = require('fs');
 const path = require('path');
 const markdownIt = require('markdown-it');
+const axios = require('axios');
 
-const { access } = fs;
-const { constants } = fs;
-const { readFile } = fs;
+const fsP = fs.promises;
+const { existsSync } = fs;
+const { readFile } = fsP;
+// const { stat } = fsP;
+// const { access } = fsP;
+// const { constants } = fsP;
 const md = markdownIt({ linkify: true });
 
 const markDownExtensions = [
   '.md', '.mkd', '.mdwn', '.mdown', '.mdtxt', '.mdtext', '.markdown', '.text',
 ];
 
-const verifyUrl = (url) => fetch(url)
+const verifyUrl = (url) => axios.get(url)
   .then((res) => {
     const data = {
-      status: (typeof res.status === 'undefined') ? 404 : res.status,
-      ok: (typeof res.statusText === 'undefined') ? 'fail' : res.statusText.toLowerCase(),
-    }
+      status: res.status,
+      ok: (res.statusText === 'OK') ? 'ok' : 'fail',
+    };
     return data;
   })
   .catch((err) => {
     const data = {
-      status: 500,
-      ok: 'fail',
-    }
+      status: (err.response) ? err.response.status : 500,
+      ok: (err.response) ? err.response.statusText.toLowerCase() : 'failed',
+    };
     return data;
-    console.log(err);
   });
 
+// const verifyUrl = (url) => fetch(url)
+//   .then((res) => {
+//     const data = {
+//       status: res.status,
+//       ok: (res.statusText === 'OK') ? 'ok' : 'fail',
+//     };
+//     return data;
+//   })
+//   .catch((err) => {
+//     console.log(err);
+//     const data = {
+//       status: 500,
+//       ok: 'fail',
+//     };
+//     return data;
+//   });
+
 const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, reject) => {
-  try{
+  try {
     const links = [];
     const html = md.render(text);
     const lines = html.split('\n');
     const max = lines.length;
+    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < max; i++) {
-      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
+      // const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
+      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(https?:\/\/.*?)\1>(.*?)<\/a>/g;
       let match;
+      // eslint-disable-next-line no-cond-assign
       while ((match = regex.exec(lines[i])) !== null) {
         const link = {
           href: match[2],
@@ -50,7 +73,9 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
     if (validate) {
       const linksVerified = links.map((link) => verifyUrl(link.href)
         .then((res) => {
+          // eslint-disable-next-line no-param-reassign
           link.status = res.status;
+          // eslint-disable-next-line no-param-reassign
           link.ok = res.ok;
           return link;
         }));
@@ -61,41 +86,37 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
     } else {
       resolve(links);
     }
-  } catch (err){
+  } catch (err) {
     reject(err);
   }
 });
 
-const fileExists = (filePath) => access(filePath, constants.F_OK);
-// .catch((err) => reject(new Error(err.message)));
+const readAFile = (file) => readFile(file, 'utf8');
 
-const readAFile = (file) => readFile(file, 'utf8')
-  .then((markdown) => markdown)
-  .catch((err) => new Error(err.message));
+const fileExists = (filePath) => existsSync(filePath);
 
 const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
   if (typeof thePath !== 'string' || thePath === '') {
     reject(new TypeError('The path is invalid'));
   }
   const absolutePath = path.resolve(thePath);
-  fileExists(absolutePath)
-    .then(() => {
-      const extension = path.extname(absolutePath);
-      if (extension === ''){
-        reject(new Error('It\'s a directory'));
-      }
-      if (!markDownExtensions.includes(extension)) {
-        reject(new Error('File is not a markdown file'));
-      } else {
-      readAFile(absolutePath)
-        .then((text) => {
-          const links = getLinksFromHtml(absolutePath, text, validate);
-          resolve(links);
-        })
-        .catch((err) => reject(new Error('Couldn\'t read the file')));
-      }
+  const exists = fileExists(absolutePath);
+  if (!exists) {
+    reject(new Error('No such file or directory'));
+  }
+  const extension = path.extname(absolutePath);
+  if (extension === '') {
+    reject(new Error('It\'s a directory'));
+  }
+  if (extension !== '' && !markDownExtensions.includes(extension)) {
+    reject(new Error('File is not a markdown file'));
+  }
+  readAFile(absolutePath)
+    .then((text) => {
+      const links = getLinksFromHtml(absolutePath, text, validate);
+      resolve(links);
     })
-    .catch((err) => reject(new Error('No such file or directory')));
+    .catch((err) => reject(err));
 });
 
 // const thePath = 200;
@@ -104,11 +125,13 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/';
 // const thePath = './some/example.md';
 // const thePath = './some/example1.md';
-const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/some/example1.md';
+// eslint-disable-next-line max-len
+// const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/some/example1.md';
+// eslint-disable-next-line max-len
 // const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/README.md';
-mdlinks(thePath, true)
-  .then((res) => console.log(res))
-  .catch((err) => console.log(err.message));
+// mdlinks(thePath, true)
+//   .then((res) => console.log(res))
+//   .catch((err) => console.log(err.message));
 
 module.exports = {
   mdlinks,
