@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const markdownIt = require('markdown-it');
+const axios = require('axios');
 
 const { stat } = fs.promises;
 // const { existsSync } = fs;
@@ -12,18 +13,18 @@ const markDownExtensions = [
   '.md', '.mkd', '.mdwn', '.mdown', '.mdtxt', '.mdtext', '.markdown', '.text',
 ];
 
-const verifyUrl = (url) => fetch(url)
+const verifyUrl = (url) => axios.get(url)
   .then((res) => {
     const data = {
-      status: (typeof res.status === 'undefined') ? 404 : res.status,
-      ok: (typeof res.statusText === 'undefined') ? 'fail' : res.statusText.toLowerCase(),
+      status: res.status,
+      ok: (res.statusText === 'OK') ? 'ok' : 'fail',
     };
     return data;
   })
-  .catch(() => {
+  .catch((err) => {
     const data = {
-      status: 500,
-      ok: 'fail',
+      status: (err.response) ? err.response.status : 500,
+      ok: (err.response) ? err.response.statusText.toLowerCase() : 'failed',
     };
     return data;
   });
@@ -42,6 +43,7 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
       let match;
       // Theorically it's ok, check this links:
       // https://eslint.org/docs/latest/rules/no-cond-assigns
+      // eslint-disable-next-line no-cond-assign
       while ((match = regex.exec(lines[i])) !== null) {
         const link = {
           href: match[2],
