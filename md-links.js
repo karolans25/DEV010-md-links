@@ -2,9 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const markdownIt = require('markdown-it');
 
-// const { access } = fs.promises;
-// const { constants } = fs.promises;
 const { stat } = fs.promises;
+// const { existsSync } = fs;
 const { readFile } = fs.promises;
 const { readdirSync } = fs;
 const md = markdownIt({ linkify: true });
@@ -93,54 +92,51 @@ const checkExtension = (fileNameArray) => {
 };
 
 const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
-  try {
-    if (typeof thePath !== 'string' || thePath === '') {
-      reject(new TypeError({ message: 'The path is invalid' }));
-    }
-    const absolutePath = path.resolve(thePath);
-    if (!fileExists(absolutePath)) {
-      reject(new Error({ message: 'No such file or directory' }));
-    }
-    let links = [];
-    const splitPath = absolutePath.split('/');
-    const splitExt = splitPath.pop().split('.');
-    if (splitExt.length <= 1) { // It's a directory
-      const files = readdirSync(absolutePath);
-      const mdFiles = [];
-      files.forEach((file) => {
-        const fileNameArray = file.split('.');
-        const isMd = checkExtension(fileNameArray);
-        if (isMd) {
-          const joinedRoute = path.join(absolutePath, file);
-          mdFiles.push(joinedRoute);
-        }
-      });
-      links = mdFiles.map((route) => readAFile(route)
-        .then((text) => {
-          links = getLinksFromHtml(route, text, validate);
-          return links;
-        })
-        .catch((err) => reject(err)));
-      Promise.all(links).then((result) => {
-        resolve(result.flat());
-      });
-      // Pending recursivity through subdirectories
-      // That implies some changes into the checkExt or check and call the
-      // mdlinks function before invoke the checkExt function
-    } else { // It's a file
-      const isMd = checkExtension(splitExt);
-      if (!isMd) {
-        reject(new Error({ message: 'File extension is not a markdown type' }));
+  if (typeof thePath !== 'string' || thePath === '') {
+    reject(new TypeError('The path is invalid'));
+    return;
+  }
+  const absolutePath = path.resolve(thePath);
+  if (!fileExists(absolutePath)) {
+    reject(new Error({ message: 'No such file or directory' }));
+  }
+  let links = [];
+  const splitPath = absolutePath.split('/');
+  const splitExt = splitPath.pop().split('.');
+  if (splitExt.length <= 1) { // It's a directory
+    const files = readdirSync(absolutePath);
+    const mdFiles = [];
+    files.forEach((file) => {
+      const fileNameArray = file.split('.');
+      const isMd = checkExtension(fileNameArray);
+      if (isMd) {
+        const joinedRoute = path.join(absolutePath, file);
+        mdFiles.push(joinedRoute);
       }
-      readAFile(absolutePath)
-        .then((text) => {
-          links = getLinksFromHtml(absolutePath, text, validate);
-          resolve(links);
-        })
-        .catch((err) => reject(err));
+    });
+    links = mdFiles.map((route) => readAFile(route)
+      .then((text) => {
+        links = getLinksFromHtml(route, text, validate);
+        return links;
+      })
+      .catch((err) => reject(err)));
+    Promise.all(links).then((result) => {
+      resolve(result.flat());
+    });
+    // Pending recursivity through subdirectories
+    // That implies some changes into the checkExt or check and call the
+    // mdlinks function before invoke the checkExt function
+  } else { // It's a file
+    const isMd = checkExtension(splitExt);
+    if (!isMd) {
+      reject(new Error({ message: 'File extension is not a markdown type' }));
     }
-  } catch (err) {
-    reject(new Error({ message: err.message }));
+    readAFile(absolutePath)
+      .then((text) => {
+        links = getLinksFromHtml(absolutePath, text, validate);
+        resolve(links);
+      })
+      .catch((err) => reject(err));
   }
 });
 

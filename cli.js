@@ -1,62 +1,106 @@
 #!/usr/bin/env node
-
-// console.log(process.argv); => this is the answer and why the two firsts are ignored
-// [
-//     '/home/karolans/.nvm/versions/node/v18.16.1/bin/node',
-//     '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/cli.js',
-//     'home'
-// ]
+const chalk = require('chalk');
+const yargs = require('yargs');
+const path = require('path');
 const { mdlinks } = require('./md-links');
 
-// const [, , ...args] = process.argv;
-const args = process.argv.splice(2);
+// Define las opciones booleanas sin valores
+const options = yargs
+  .usage(`\n${chalk.green.bold('Usage: $0 <./path/file/or/dir> [options]')}`)
+  .option('validate', {
+    describe: 'Validate the links',
+    type: 'boolean',
+  })
+  .alias('b', 'validate')
+  .option('stats', {
+    describe: 'Show the stadistics',
+    type: 'boolean',
+  })
+  .alias('s', 'stats')
+  .help('h')
+  .alias('help', 'h')
+  .version()
+  .alias('v', 'version')
+  .argv;
 
-const arg = args[0].split('').splice(1).join('');
-if (args.length === 1) {
-  mdlinks(args[0]).then((res) => {
-    // console.table(res.map((item) => ({ path: args[0], href: item.href, text: item.text })));
+// Ahora puedes acceder a las opciones en tu código
+const { validate, stats } = options;
+const currentPath = process.cwd();
+
+if (validate && stats) {
+  mdlinks(options._[0], true).then((res) => {
+    let output = `\nTotal:\t${res.length}\n`;
+    const unique = [];
+    const broken = [];
     res.forEach((element) => {
-      const file = `${args[0]}${element.file.split(arg)[1]}`;
-      console.log('%s\t%s\t%s', file, element.href, element.text.substr(0, 49));
+      if (!unique.includes(element.href)) unique.push(element.href);
+      if (element.ok !== 'ok') broken.push(element.href);
     });
-  }).catch(() => console.log('Error'));
-} else if (args[1] === '--validate' && args.length === 2) {
-  mdlinks(args[0], true).then((res) => {
+    output += `Unique:\t${unique.length}\nBroken:\t${broken.length}\n`;
+    console.log(output);
+  }).catch((err) => {
+    const output = `${chalk.red.bold(err.message)}`;
+    console.log(output);
+    console.log(`${chalk.yellow.underline('Write mdlinks -h to show help')}`);
+  });
+} else if (validate) {
+  mdlinks(options._[0], true).then((res) => {
+    let output = '';
     res.forEach((element) => {
-      const file = `${args[0]}${element.file.split(arg)[1]}`;
+      output += `${path.relative(currentPath, element.file)}\t${element.href}`;
       if (element.ok === 'ok') {
-        // console.log('%s\t%s\t%s', file, element.href, element.text);
-        console.log('%s\t%s\t%s\t%s', file, element.href, `${element.ok} ${element.status}`, element.text.substr(0, 49));
-      } else {
-        console.log('%s\t%s\t%s\t%s', file, element.href, `${element.ok} ${element.status}`, element.text.substr(0, 49));
+        output += `\t${chalk.green.bold(element.ok)} ${chalk.green.bold(element.status)}`;
+      } else if (element.ok === 'failed') {
+        output += `\t${chalk.red.bold(element.ok)} ${chalk.red.bold(element.status)}`;
       }
+      output += `\t${element.text.substr(0, 49)}\n`;
+      // const data = {
+      //   file: `${chalk.white.bold(path.relative(currentPath, element.file))}`,
+      //   href: `${chalk.white.bold(element.href)}`,
+      //   text: `${chalk.white.bold(element.text.substr(0, 49))}`,
+      // };
+      // console.table(data);
     });
-  }).catch(() => console.log('Error'));
-} else if (args[1] === '--stats') {
-  mdlinks(args[0]).then((res) => {
-    console.log('\nTotal: ', res.length);
-    const links = [];
+    console.log(output);
+  }).catch((err) => {
+    const output = `${chalk.red.bold(err.message)}`;
+    console.log(output);
+    console.log(`${chalk.yellow.underline('Write mdlinks -h to show help')}`);
+  });
+} else if (stats) {
+  mdlinks(options._[0], true).then((res) => {
+    let output = `\nTotal:\t${res.length}\n`;
+    const unique = [];
     res.forEach((element) => {
-      if (!links.includes(element.href)) {
-        links.push(element.href);
+      if (!unique.includes(element.href)) {
+        unique.push(element.href);
       }
     });
-    console.log('Unique: ', links.length, '\n');
-  }).catch(() => console.log('Error'));
+    output += `Unique:\t${unique.length}\n`;
+    console.log(output);
+  }).catch((err) => {
+    const output = `${chalk.red.bold(err.message)}`;
+    console.log(output);
+    console.log(`${chalk.yellow.underline('Write mdlinks -h to show help')}`);
+  });
+} else if (typeof options._[0] === 'undefined') {
+  console.log(`${chalk.yellow.underline('Write mdlinks -h to show help')}`);
 } else {
-  let broken = 0;
-  mdlinks(args[0], true).then((res) => {
-    console.log('\nTotal: ', res.length);
-    const links = [];
+  mdlinks(options._[0]).then((res) => {
+    let output = '';
     res.forEach((element) => {
-      if (!links.includes(element.href)) {
-        links.push(element.href);
-      }
-      if (element.ok === 'failed') {
-        broken += 1;
-      }
+      output += `${path.relative(currentPath, element.file)}\t${element.href}\t${element.text.substr(0, 49)}\n`;
+      // const data = {
+      //   file: `${path.relative(currentPath, element.file)}`,
+      //   href: `${element.href}`,
+      //   text: `${element.text.substr(0, 49)}`,
+      // };
+      // console.table(data);
     });
-    console.log('Unique: ', links.length);
-    console.log('Broken: ', broken, '\n');
-  }).catch(() => console.log('Error'));
+    console.log(output);
+  }).catch((err) => {
+    const output = `${chalk.red.bold(err.message)}`;
+    console.log(output);
+    console.log(`${chalk.yellow.underline('Write mdlinks -h to show help')}`);
+  });
 }

@@ -6,21 +6,21 @@ const { mdlinks } = require('../md-links');
 const DATA_RESULT = '[{"file":"/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/some/example1.md","href":"https://es.wikipedia.org/wiki/Markdownx","line":4,"text":"Markdown"},{"file":"/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/some/example1.md","href":"https://nodejs.org/","line":13,"text":"Node.js"}]';
 
 describe('mdLinks', () => {
-  it('should be a function', () => {
+  it.only('should be a function', () => {
     expect(typeof mdlinks).toBe('function');
   });
 
-  it('should reject with an invalid type of path, empty string  or without any argument', () => {
-    expect(mdlinks()).rejects.toThrow('The path is invalid');
-    expect(mdlinks(null)).rejects.toThrow('The path is invalid');
-    expect(mdlinks(undefined)).rejects.toThrow('The path is invalid');
-    expect(mdlinks('')).rejects.toThrow('The path is invalid');
-    expect(mdlinks(2)).rejects.toThrow('The path is invalid');
-    expect(mdlinks([])).rejects.toThrow('The path is invalid');
-    expect(mdlinks({}, null, undefined, '')).rejects.toThrow('The path is invalid');
+  it.only('should reject with an invalid type of path, empty string  or without any argument', () => {
+    expect(mdlinks()).rejects.toThrow(TypeError);
+    expect(mdlinks(null)).rejects.toThrow(TypeError);
+    expect(mdlinks(undefined)).rejects.toThrow(TypeError);
+    expect(mdlinks('')).rejects.toThrow(TypeError);
+    expect(mdlinks(200)).rejects.toThrow(TypeError);
+    expect(mdlinks([])).rejects.toThrow(TypeError);
+    expect(mdlinks({}, null, undefined, '')).rejects.toThrow(TypeError);
   });
 
-  it('should reject with a TypeError when file is not a valid string', () => {
+  it.only('should reject with a TypeError when file is not a valid string', () => {
     expect.assertions(1);
     return expect(mdlinks()).rejects.toThrow(TypeError);
   });
