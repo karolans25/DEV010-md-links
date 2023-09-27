@@ -26,48 +26,46 @@ const markDownExtensions = [
 //   .catch((err) => err);
 
 const getLinksFromHtml = (filePath, text) => new Promise((resolve, reject) => {
-  const links = [];
-  const html = md.render(text);
-  const lines = html.split('\n');
-  const max = lines.length;
-  for (let i = 0; i < max; i++) {
-    const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
-    let match;
-    while ((match = regex.exec(lines[i])) !== null) {
-      const link = {
-        href: match[2],
-        text: match[3],
-        file: filePath,
-        line: parseInt(i, 10) + 1,
-      };
-      links.push(link);
+  try {
+    const links = [];
+    const html = md.render(text);
+    const lines = html.split('\n');
+    const max = lines.length;
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < max; i++) {
+      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
+      let match;
+      // eslint-disable-next-line no-cond-assign
+      while ((match = regex.exec(lines[i])) !== null) {
+        const link = {
+          href: match[2],
+          text: match[3],
+          file: filePath,
+          line: parseInt(i, 10) + 1,
+        };
+        links.push(link);
+      }
     }
-  }
-  // if (validate) {
-  //   const linksVerified = links.map((link) => verifyUrl(link.href)
-  //     .then((res) => {
-  //       link.status = res.status;
-  //       link.ok = res.ok;
-  //       return link;
-  //     }));
+    // if (validate) {
+    //   const linksVerified = links.map((link) => verifyUrl(link.href)
+    //     .then((res) => {
+    //       link.status = res.status;
+    //       link.ok = res.ok;
+    //       return link;
+    //     }));
 
-  //   Promise.all(linksVerified).then((result) => {
-  //     resolve(result);
-  //   });
-  // } else {
-  resolve(links);
+    //   Promise.all(linksVerified).then((result) => {
+    //     resolve(result);
+    //   });
+    // } else {
+    resolve(links);
   // }
+  } catch (err) {
+    reject(err);
+  }
 });
 
-const readAFile = (file) => readFile(file, 'utf8')
-  .then((markdown) => {
-    console.log(markdown);
-    return markdown;
-  })
-  .catch((err) => {
-    console.log(err);
-    return err;
-  });
+const readAFile = (file) => readFile(file, 'utf8');
 
 const fileExists = (filePath) => existsSync(filePath);
 
@@ -89,8 +87,6 @@ const mdlinks = (thePath) => new Promise((resolve, reject) => {
   }
   readAFile(absolutePath)
     .then((text) => {
-      // console.log(text);
-      // resolve(absolutePath);
       const links = getLinksFromHtml(absolutePath, text);
       resolve(links);
     })
@@ -103,10 +99,11 @@ const mdlinks = (thePath) => new Promise((resolve, reject) => {
 // const thePath = './some/';
 // const thePath = './some/example.md';
 // const thePath = './some/example1.md';
-const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/README.md';
-mdlinks(thePath, false)
-  .then((res) => console.log(res))
-  .catch((err) => console.log(err.message));
+// eslint-disable-next-line max-len
+// const thePath = '/home/karolans/Documents/Github/Laboratoria/Bootcamp/Project_04/DEV010-md-links/README.md';
+// mdlinks(thePath, false)
+//   .then((res) => console.log(res))
+//   .catch((err) => console.log(err.message));
 // mdlinks(thePath, true)
 //   .then((res) => console.log(res))
 //   .catch((err) => console.log(err.message));
