@@ -42,7 +42,7 @@ if (validate || stats) {
       console.log(output);
     } else if (validate) {
       res.forEach((element) => {
-        output += `${path.relative(currentPath, element.file)}\t${element.href}`;
+        output += `${path.relative(currentPath, element.file)}\t${element.line}\t${element.href}`;
         if (element.ok === 'ok') {
           output += `\t${chalk.green.bold(element.ok)} ${chalk.green.bold(element.status)}`;
         } else if (element.ok === 'failed') {
@@ -72,15 +72,8 @@ if (validate || stats) {
 } else {
   mdlinks(options._[0]).then((res) => {
     let output = '';
-    console.log('75: ', res);
     res.forEach((element) => {
-      output += `${path.relative(currentPath, element.file)}\t${element.href}\t${element.text.substr(0, 49)}\n`;
-      // const data = {
-      //   file: `${path.relative(currentPath, element.file)}`,
-      //   href: `${element.href}`,
-      //   text: `${element.text.substr(0, 49)}`,
-      // };
-      // console.table(data);
+      output += `${path.relative(currentPath, element.file)}\t${element.line}\t${element.href}\t${element.text.substr(0, 49)}\n`;
     });
     console.log(output);
   }).catch((err) => {

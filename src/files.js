@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { statSync } = fs;
+const { statSync, readdirSync } = fs;
 
 const markDownExtensions = [
   '.md', '.mkd', '.mdwn', '.mdown', '.mdtxt', '.mdtext', '.markdown', '.text',
@@ -11,9 +11,7 @@ const { readFile } = fs.promises;
 
 const fileExists = (filePath) => statSync(filePath);
 
-const readAFile = (file) => readFile(file, 'utf8')
-  .then((markdown) => markdown)
-  .catch((err) => err);
+const readAFile = (file) => readFile(file, 'utf8');
 
 const checkExtension = (file) => {
   const ext = path.extname(file);
@@ -33,7 +31,7 @@ const listAllMdFiles = (files) => {
 };
 
 const listAllFiles = (thePath, allFiles = []) => {
-  const files = fs.readdirSync(thePath);
+  const files = readdirSync(thePath);
   files.forEach((file) => {
     const routeFile = path.join(thePath, file);
     const statObject = fileExists(routeFile);

@@ -26,6 +26,7 @@ const verifyUrl = (url) => axios.get(url)
 
 const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, reject) => {
   try {
+    console.log(text);
     const links = [];
     const html = md.render(text);
     const lines = html.split('\n');
