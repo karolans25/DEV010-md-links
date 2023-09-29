@@ -82,14 +82,9 @@ const readAFile = (file) => readFile(file, 'utf8')
   .then((markdown) => markdown)
   .catch((err) => err);
 
-const checkExtension = (fileNameArray) => {
-  if (!(fileNameArray.length > 1)) {
-    return false;
-  }
-  const ext = `.${fileNameArray.pop()}`;
-  if (!markDownExtensions.includes(ext)) {
-    return false;
-  }
+const checkExtension = (file) => {
+  const ext = path.extname(file);
+  if (!markDownExtensions.includes(ext)) return false;
   return true;
 };
 
@@ -102,15 +97,13 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
   if (!fileExists(absolutePath)) {
     reject(new Error({ message: 'No such file or directory' }));
   }
+  const extension = path.extname(absolutePath);
   let links = [];
-  const splitPath = absolutePath.split('/');
-  const splitExt = splitPath.pop().split('.');
-  if (splitExt.length <= 1) { // It's a directory
+  if (extension === '') { // It's a directory
     const files = readdirSync(absolutePath);
     const mdFiles = [];
     files.forEach((file) => {
-      const fileNameArray = file.split('.');
-      const isMd = checkExtension(fileNameArray);
+      const isMd = checkExtension(file);
       if (isMd) {
         const joinedRoute = path.join(absolutePath, file);
         mdFiles.push(joinedRoute);
@@ -129,7 +122,7 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
     // That implies some changes into the checkExt or check and call the
     // mdlinks function before invoke the checkExt function
   } else { // It's a file
-    const isMd = checkExtension(splitExt);
+    const isMd = checkExtension(extension);
     if (!isMd) {
       reject(new Error({ message: 'File extension is not a markdown type' }));
     }

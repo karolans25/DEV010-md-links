@@ -11,7 +11,7 @@ const options = yargs
     describe: 'Validate the links',
     type: 'boolean',
   })
-  .alias('b', 'validate')
+  .alias('V', 'validate')
   .option('stats', {
     describe: 'Show the stadistics',
     type: 'boolean',
