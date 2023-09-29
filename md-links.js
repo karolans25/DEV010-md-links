@@ -1,138 +1,18 @@
-const fs = require('fs');
-const path = require('path');
-const markdownIt = require('markdown-it');
-const axios = require('axios');
-
-const { stat } = fs.promises;
-// const { existsSync } = fs;
-const { readFile } = fs.promises;
-const { readdirSync } = fs;
-const md = markdownIt({ linkify: true });
-
-const markDownExtensions = [
-  '.md', '.mkd', '.mdwn', '.mdown', '.mdtxt', '.mdtext', '.markdown', '.text',
-];
-
-const verifyUrl = (url) => axios.get(url)
-  .then((res) => {
-    const data = {
-      status: res.status,
-      ok: (res.statusText === 'OK') ? 'ok' : 'fail',
-    };
-    return data;
-  })
-  .catch((err) => {
-    const data = {
-      status: (err.response) ? err.response.status : 500,
-      ok: (err.response) ? err.response.statusText.toLowerCase() : 'failed',
-    };
-    return data;
-  });
-
-const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, reject) => {
-  try {
-    const links = [];
-    const html = md.render(text);
-    const lines = html.split('\n');
-    const max = lines.length;
-    for (let i = 0; i < max; i++) {
-      // const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
-      // const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(?!#)(.*?)\1>(.*?)<\/a>/g;
-      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(?!\.\/|#)(.*?)\1>(.*?)<\/a>/g;
-
-      let match;
-      // Theorically it's ok, check this links:
-      // https://eslint.org/docs/latest/rules/no-cond-assigns
-      // eslint-disable-next-line no-cond-assign
-      while ((match = regex.exec(lines[i])) !== null) {
-        const link = {
-          href: match[2],
-          text: match[3],
-          file: filePath,
-          line: parseInt(i, 10) + 1,
-        };
-        links.push(link);
-      }
-    }
-    if (validate) {
-      const linksVerified = links.map((link) => verifyUrl(link.href)
-        .then((res) => {
-          link.status = res.status;
-          // link.ok = res.ok;
-          link.ok = (res.ok === 'ok') ? res.ok : 'failed';
-          return link;
-        }));
-
-      Promise.all(linksVerified).then((result) => {
-        resolve(result);
-      });
-    } else {
-      resolve(links);
-    }
-  } catch (err) {
-    reject(err);
-  }
-});
-
-const fileExists = (filePath) => stat(filePath)
-  .then(() => true).catch(() => false);
-// .catch((err) => reject(new Error(err.message)));
-
-const readAFile = (file) => readFile(file, 'utf8')
-  .then((markdown) => markdown)
-  .catch((err) => err);
-
-const checkExtension = (file) => {
-  const ext = path.extname(file);
-  if (!markDownExtensions.includes(ext)) return false;
-  return true;
-};
+const { stat } = require('fs').promises;
+const { getLinksFromPath } = require('./src/links');
 
 const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
   if (typeof thePath !== 'string' || thePath === '') {
     reject(new TypeError('The path is invalid'));
-    return;
   }
-  const absolutePath = path.resolve(thePath);
-  if (!fileExists(absolutePath)) {
-    reject(new Error({ message: 'No such file or directory' }));
-  }
-  const extension = path.extname(absolutePath);
-  let links = [];
-  if (extension === '') { // It's a directory
-    const files = readdirSync(absolutePath);
-    const mdFiles = [];
-    files.forEach((file) => {
-      const isMd = checkExtension(file);
-      if (isMd) {
-        const joinedRoute = path.join(absolutePath, file);
-        mdFiles.push(joinedRoute);
-      }
-    });
-    links = mdFiles.map((route) => readAFile(route)
-      .then((text) => {
-        links = getLinksFromHtml(route, text, validate);
-        return links;
-      })
-      .catch((err) => reject(err)));
-    Promise.all(links).then((result) => {
-      resolve(result.flat());
-    });
-    // Pending recursivity through subdirectories
-    // That implies some changes into the checkExt or check and call the
-    // mdlinks function before invoke the checkExt function
-  } else { // It's a file
-    const isMd = checkExtension(extension);
-    if (!isMd) {
-      reject(new Error({ message: 'File extension is not a markdown type' }));
-    }
-    readAFile(absolutePath)
-      .then((text) => {
-        links = getLinksFromHtml(absolutePath, text, validate);
-        resolve(links);
+
+  stat(thePath).then(() => {
+    getLinksFromPath(thePath, validate)
+      .then((result) => {
+        resolve(result);
       })
       .catch((err) => reject(err));
-  }
+  }).catch(() => reject(new Error('No such file or directory')));
 });
 
 // const thePath = 200;
