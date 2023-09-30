@@ -1,13 +1,13 @@
 // const fs = require('fs');
 // const path = require('path');
 // const axios = require('axios');
-// const markdownIt = require('markdown-it');
+const markdownIt = require('markdown-it');
 
 const {
   verifyUrl, getLinksFromHtml, getLinksFromPath,
 } = require('../src/links');
 
-// const md = markdownIt({ linkify: true });
+const md = markdownIt({ linkify: true });
 
 // const thePath = '/some/example';
 // const statObject = {};
@@ -77,6 +77,7 @@ describe('links functions', () => {
 
   describe('getLinksFromHTML', () => {
     it('should be a function', () => {
+      console.log(md);
       expect(typeof getLinksFromHtml).toBe('function');
     });
     // it('should return an empty array for a file without links', async () => {

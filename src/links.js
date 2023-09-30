@@ -9,7 +9,7 @@ const {
   listAllMDFiles,
 } = require('./files');
 
-const md = markdownIt({ linkify: true, breaks: false });
+const md = markdownIt();
 
 const verifyUrl = (url) => axios.get(url)
   .then((res) => {
