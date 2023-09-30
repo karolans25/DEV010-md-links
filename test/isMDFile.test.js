@@ -1,0 +1,29 @@
+const path = require('path');
+
+const { isMDFile } = require('../src/files');
+
+const thePath = '/some/example';
+
+jest.mock('path', () => ({
+  extname: jest.fn(),
+}));
+
+describe('files functions', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('isMDFile', () => {
+    it('should be a function', () => {
+      expect(typeof isMDFile).toBe('function');
+    });
+    it('should return true if the file is markdown', async () => {
+      path.extname.mockReturnValue('.md');
+      expect(isMDFile(thePath)).toBeTruthy();
+    });
+    it('should return false if the file is not a markdown', async () => {
+      path.extname.mockReturnValue('.txt');
+      expect(isMDFile(thePath)).toBeFalsy();
+    });
+  });
+});

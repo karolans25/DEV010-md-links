@@ -16,7 +16,6 @@ const isMDFile = (file) => {
 const listAllMDFiles = (thePath, allFiles) => {
   try {
     const files = readdirSync(thePath);
-    if (!files) console.log('is a path');
     files.forEach((file) => {
       const absoluteRouteFile = join(thePath, file);
       const statObject = statSync(absoluteRouteFile);
@@ -36,5 +35,5 @@ const listAllMDFiles = (thePath, allFiles) => {
 };
 
 module.exports = {
-  listAllMDFiles,
+  isMDFile, listAllMDFiles,
 };
