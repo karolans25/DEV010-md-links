@@ -27,8 +27,18 @@
   "dependencies": {
     "axios": "^1.5.1",
     "chalk": "^4.1.0",
-    "markdown-it": "^13.0.2",
+    "markdown-it": "^13.0.1",
     "yargs": "^17.7.2"
+  },
+  "description": "## Índice",
+  "main": "cli.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karolans25/DEV010-md-links.git"
   },
   "keywords": [
     "md-links",
