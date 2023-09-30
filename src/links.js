@@ -1,44 +1,43 @@
+const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const markdownIt = require('markdown-it');
 
+const { readFile } = fs.promises;
+
 const {
-  listAllFiles, listAllMdFiles, readAFile,
+  listAllMDFiles,
 } = require('./files');
 
-const md = markdownIt({ linkify: true });
+const md = markdownIt({ linkify: true, breaks: false });
 
 const verifyUrl = (url) => axios.get(url)
   .then((res) => {
     const data = {
       status: res.status,
-      ok: (res.statusText === 'OK') ? 'ok' : 'fail',
+      ok: res.statusText === 'OK' ? 'ok' : 'failed',
     };
     return data;
   })
   .catch((err) => {
     const data = {
-      status: (err.response) ? err.response.status : 500,
-      ok: (err.response) ? err.response.statusText.toLowerCase() : 'failed',
+      status: err.response.status ? err.response.status : 500,
+      ok: err.response.statusText ? err.response.statusText.toLowerCase() : 'failed',
     };
     return data;
   });
 
 const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, reject) => {
   try {
-    console.log(text);
     const links = [];
-    const html = md.render(text);
-    const lines = html.split('\n');
-    const max = lines.length;
+    const linesFromMD = text.split('\n');
+    const max = linesFromMD.length;
     for (let i = 0; i < max; i++) {
-      // const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
-      // const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(?!#)(.*?)\1>(.*?)<\/a>/g;
+      const html = md.render(linesFromMD[i]);
       const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(?!\.\/|#)(.*?)\1>(.*?)<\/a>/g;
-
       let match;
       // eslint-disable-next-line no-cond-assign
-      while ((match = regex.exec(lines[i])) !== null) {
+      while ((match = regex.exec(html)) !== null) {
         const link = {
           href: match[2],
           text: match[3],
@@ -52,7 +51,6 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
       const linksVerified = links.map((link) => verifyUrl(link.href)
         .then((res) => {
           link.status = res.status;
-          // link.ok = res.ok;
           link.ok = (res.ok === 'ok') ? res.ok : 'failed';
           return link;
         }));
@@ -71,9 +69,8 @@ const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, rej
 const getLinksFromPath = (thePath, validate) => {
   let links = [];
   const absolutePath = path.resolve(thePath);
-  const files = listAllFiles(absolutePath);
-  const mdFiles = listAllMdFiles(files);
-  links = mdFiles.map((route) => readAFile(route)
+  const mdFiles = listAllMDFiles(absolutePath, []);
+  links = mdFiles.map((route) => readFile(route, 'utf8')
     .then((text) => {
       links = getLinksFromHtml(route, text, validate);
       return links;

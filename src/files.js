@@ -2,48 +2,33 @@ const fs = require('fs');
 const path = require('path');
 
 const { statSync, readdirSync } = fs;
+const { extname, join } = path;
 
 const markDownExtensions = [
   '.md', '.mkd', '.mdwn', '.mdown', '.mdtxt', '.mdtext', '.markdown', '.text',
 ];
 
-const { readFile } = fs.promises;
-
-const fileExists = (filePath) => statSync(filePath);
-
-const readAFile = (file) => readFile(file, 'utf8');
-
-const checkExtension = (file) => {
-  const ext = path.extname(file);
-  if (!markDownExtensions.includes(ext)) return false;
-  return true;
+const isMDFile = (file) => {
+  const ext = extname(file);
+  return markDownExtensions.includes(ext);
 };
 
-const listAllMdFiles = (files) => {
-  const mdFiles = [];
-  files.forEach((file) => {
-    const isMd = checkExtension(file);
-    if (isMd) {
-      mdFiles.push(file);
-    }
-  });
-  return mdFiles;
-};
+// const getMDFiles = (files) => files.filter((file) => isMDFile(file));
 
-const listAllFiles = (thePath, allFiles = []) => {
+const listAllMDFiles = (thePath, allFiles) => {
   const files = readdirSync(thePath);
   files.forEach((file) => {
-    const routeFile = path.join(thePath, file);
-    const statObject = fileExists(routeFile);
-    if (statObject.isFile()) {
-      allFiles.push(routeFile);
+    const absoluteRouteFile = join(thePath, file);
+    const statObject = statSync(absoluteRouteFile);
+    if (statObject.isFile() && isMDFile(absoluteRouteFile)) {
+      allFiles.push(absoluteRouteFile);
     } else if (statObject.isDirectory()) {
-      listAllFiles(routeFile, allFiles);
+      listAllMDFiles(absoluteRouteFile, allFiles);
     }
   });
   return allFiles;
 };
 
 module.exports = {
-  fileExists, readAFile, checkExtension, listAllMdFiles, listAllFiles,
+  listAllMDFiles,
 };

@@ -1,4 +1,4 @@
-const { stat } = require('fs').promises;
+const { existsSync } = require('fs');
 const { getLinksFromPath } = require('./src/links');
 
 const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
@@ -6,13 +6,13 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
     reject(new TypeError('The path is invalid'));
   }
 
-  stat(thePath).then(() => {
+  if (existsSync(thePath)) {
     getLinksFromPath(thePath, validate)
-      .then((result) => {
-        resolve(result);
-      })
+      .then((result) => resolve(result))
       .catch((err) => reject(err));
-  }).catch(() => reject(new Error('No such file or directory')));
+  } else {
+    reject(new Error('No such file or directory'));
+  }
 });
 
 // const thePath = 200;
