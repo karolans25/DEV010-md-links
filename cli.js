@@ -27,58 +27,52 @@ const options = yargs
 const { validate, stats } = options;
 const currentPath = process.cwd();
 
-if (validate || stats) {
-  let output = '';
+let output = '';
+
+const consoleError = (err) => {
+  output = `\n${chalk.red.bold(err.message)}`;
+  console.log(output);
+  console.log(`\n${chalk.yellow.underline('Write mdlinks -h to show help')}\n`);
+};
+
+if (validate) {
   mdlinks(options._[0], true).then((res) => {
-    if (validate && stats) {
-      output = `\nTotal:\t${res.length}\n`;
+    if (stats) {
       const unique = [];
       const broken = [];
       res.forEach((element) => {
         if (!unique.includes(element.href)) unique.push(element.href);
         if (element.ok !== 'ok') broken.push(element.href);
       });
-      output += `Unique:\t${unique.length}\nBroken:\t${broken.length}\n`;
-      console.log(output);
-    } else if (validate) {
+      output = `\nTotal:\t${res.length}\nUnique:\t${unique.length}\nBroken:\t${broken.length}\n`;
+    } else {
       res.forEach((element) => {
-        output += `${path.relative(currentPath, element.file)}\t${element.line}\t${element.href}`;
+        let validateText = '';
         if (element.ok === 'ok') {
-          output += `\t${chalk.green.bold(element.ok)} ${chalk.green.bold(element.status)}`;
+          validateText = `\t${chalk.green.bold(element.ok)} ${chalk.green.bold(element.status)}`;
         } else if (element.ok === 'failed') {
-          output += `\t${chalk.red.bold(element.ok)} ${chalk.red.bold(element.status)}`;
+          validateText = `\t${chalk.red.bold(element.ok)} ${chalk.red.bold(element.status)}`;
         }
-        output += `\t${element.text.substr(0, 49)}\n`;
+        output += `${path.relative(currentPath, element.file)}\t${element.line}\t${element.href}\t${validateText}\t${element.text.substr(0, 49)}\n`;
       });
-      console.log(output);
-    } else if (stats) {
-      output = `\nTotal:\t${res.length}\n`;
+    }
+    console.log(output);
+  }).catch((err) => consoleError(err));
+} else {
+  mdlinks(options._[0], false).then((res) => {
+    if (stats) {
       const unique = [];
       res.forEach((element) => {
         if (!unique.includes(element.href)) {
           unique.push(element.href);
         }
       });
-      output += `Unique:\t${unique.length}\n`;
-      console.log(output);
+      output = `\nTotal:\t${res.length}\nUnique:\t${unique.length}\n`;
+    } else {
+      res.forEach((element) => {
+        output += `${path.relative(currentPath, element.file)}\t${element.line}\t${element.href}\t${element.text.substr(0, 49)}\n`;
+      });
     }
-  }).catch((err) => {
-    output = `${chalk.red.bold(err.message)}`;
     console.log(output);
-    console.log(`${chalk.yellow.underline('Write mdlinks -h to show help')}`);
-  });
-} else if (typeof options._[0] === 'undefined') {
-  console.log(`${chalk.yellow.underline('Write mdlinks -h to show help')}`);
-} else {
-  mdlinks(options._[0]).then((res) => {
-    let output = '';
-    res.forEach((element) => {
-      output += `${path.relative(currentPath, element.file)}\t${element.line}\t${element.href}\t${element.text.substr(0, 49)}\n`;
-    });
-    console.log(output);
-  }).catch((err) => {
-    const output = `${chalk.red.bold(err.message)}`;
-    console.log(output);
-    console.log(`${chalk.yellow.underline('Write mdlinks -h to show help')}`);
-  });
+  }).catch((err) => consoleError(err));
 }
