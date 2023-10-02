@@ -8,7 +8,12 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 
   if (existsSync(thePath)) {
     getLinksFromPath(thePath, validate)
-      .then((result) => resolve(result))
+      .then((result) => {
+        if (result.length === 0) {
+          reject(new Error('There\'s no links'));
+        }
+        resolve(result);
+      })
       .catch((err) => reject(err));
   } else {
     reject(new Error('No such file or directory'));
@@ -22,7 +27,7 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/example.md';
 // const thePath = './some/example1.md';
 // const thePath = './README.md';
-// const thePath = './some/';
+// const thePath = './grandma/example3.md';
 // mdlinks(thePath, true)
 //   .then((res) => console.log(res, res.length))
 //   .catch((err) => console.log(err.message));

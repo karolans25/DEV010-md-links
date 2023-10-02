@@ -30,7 +30,8 @@ const listAllMDFiles = (thePath, allFiles) => {
     if (isMDFile(thePath)) {
       return [thePath];
     }
-    return [];
+    return new Error('The file is not a MD file');
+    // return [];
   }
 };
 

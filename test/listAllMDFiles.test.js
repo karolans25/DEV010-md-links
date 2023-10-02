@@ -75,7 +75,7 @@ describe('files functions', () => {
       expect(listAllMDFiles(mdFilePath, [])).toStrictEqual([mdFilePath]);
     });
     it('should return an empty array if the path is a file but is not a md file ', () => {
-      expect(listAllMDFiles(filePath, [])).toStrictEqual([]);
+      expect(listAllMDFiles(filePath, [])).toStrictEqual(new Error('The file is not a MD file'));
     });
   });
 });
