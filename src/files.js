@@ -13,28 +13,27 @@ const isMDFile = (file) => {
   return markDownExtensions.includes(ext);
 };
 
-const listAllMDFiles = (thePath, allFiles) => {
+const listAllMDFilesFromDirectory = (thePath, allFiles) => {
   try {
     const files = readdirSync(thePath);
     files.forEach((file) => {
       const absoluteRouteFile = join(thePath, file);
       const statObject = statSync(absoluteRouteFile);
-      if (statObject.isFile() && isMDFile(absoluteRouteFile)) {
-        allFiles.push(absoluteRouteFile);
-      } else if (statObject.isDirectory()) {
-        listAllMDFiles(absoluteRouteFile, allFiles);
+      if (statObject.isDirectory()) {
+        listAllMDFilesFromDirectory(absoluteRouteFile, allFiles);
+      }
+      if (statObject.isFile()) {
+        if (isMDFile(absoluteRouteFile)) {
+          allFiles.push(absoluteRouteFile);
+        }
       }
     });
     return allFiles;
   } catch (err) {
-    if (isMDFile(thePath)) {
-      return [thePath];
-    }
-    return new Error('The file is not a MD file');
-    // return [];
+    return err;
   }
 };
 
 module.exports = {
-  isMDFile, listAllMDFiles,
+  isMDFile, listAllMDFilesFromDirectory,
 };

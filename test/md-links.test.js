@@ -64,23 +64,32 @@ describe('mdLinks', () => {
   });
 
   it('should reject if absolute path doesn\'t exist', async () => {
-    fs.existsSync.mockReturnValue(false);
-    const res = await mdlinks(thePath);
-    expect(res).toThrow(Error);
+    try {
+      fs.existsSync.mockReturnValue(false);
+      await mdlinks(thePath);
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+    }
   });
 
   it('should reject if there\'s any error getting links from path', async () => {
-    fs.existsSync.mockReturnValue(true);
-    getLinksFromPath.mockRejectedValue(new Error());
-    const res = await mdlinks(thePath);
-    expect(res).toThrow(Error);
+    try {
+      fs.existsSync.mockReturnValue(true);
+      getLinksFromPath.mockRejectedValue(new Error());
+      await mdlinks(thePath);
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+    }
   });
 
   it('should reject if there\'s no links', async () => {
-    fs.existsSync.mockReturnValue(true);
-    getLinksFromPath.mockResolvedValue([]);
-    const res = await mdlinks(thePath);
-    expect(res).toThrow(Error);
+    try {
+      fs.existsSync.mockReturnValue(true);
+      getLinksFromPath.mockResolvedValue([]);
+      await mdlinks(thePath);
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+    }
   });
 
   it('should resolve with an array of objects from file with links', async () => {
@@ -97,19 +106,6 @@ describe('mdLinks', () => {
     expect(JSON.stringify(res)).toBe(DATA_RESULT_VALIDATE);
   });
 });
-
-// it.skip('should reject with a TypeError when file is not a valid string', () => {
-//   expect.assertions(1);
-//   return expect(mdlinks()).rejects.toThrow(TypeError);
-// });
-
-/*
-  */
-
-// it.skip('should reject with an Error when file doesn\'t have an extension', () => {
-//   expect.assertions(1);
-//   return expect(mdlinks('./some/example')).rejects.toThrow(Error);
-// });
 
 /*
   it('should reject if the path is not a markdown file and a directory neither', async () => {

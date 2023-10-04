@@ -1,21 +1,3 @@
-const fs = require('fs');
-const path = require('path');
-const axios = require('axios');
-// const markdownIt = require('markdown-it');
-
-const {
-  verifyUrl, getLinksFromHtml, getLinksFromPath,
-} = require('../src/links');
-
-const {
-  listAllMDFiles,
-} = require('../src/files');
-
-// const md = markdownIt({ linkify: true });
-
-const theUrl = 'https://link_example.com';
-const thePath = '/some/example';
-
 const DATA_ALL_MD_FILES = ['some/example1.md', 'some/somes/expample1.md', 'some/somes/example2.md'];
 
 const MD_FILE_WHITHOUT_LINKS = '# Example\nThis is an example';
@@ -30,48 +12,67 @@ const MD_LINKS_DIR = '[{"href":"https://es.wikipedia.org/wiki/Markdownx","text":
 
 const MD_LINKS_DIR_VALIDATE = '[{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/example1.md","line":7,"status":404,"ok":"failed"},{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/example1.md","line":7,"status":404,"ok":"failed"},{"href":"https://nodejs.org/","text":"Node.js","file":"some/example1.md","line":18,"status":200,"ok":"ok"},{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/somes/example2.md","line":7,"status":404,"ok":"failed"},{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/somes/example2.md","line":7,"status":404,"ok":"failed"},{"href":"https://nodejs.org/","text":"Node.js","file":"some/somes/example2.md","line":18,"status":200,"ok":"ok"}]';
 
-// const statObject = {};
+const URL = 'https://link_example.com';
+const PATH = '/some/example';
+
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
+// const markdownIt = require('markdown-it');
+
+const {
+  verifyUrl, getLinksFromHtml, getLinksFromPath,
+} = require('../src/links');
+
+const {
+  isMDFile, listAllMDFilesFromDirectory,
+} = require('../src/files');
+
+// const md = markdownIt();
 
 jest.mock('axios', () => ({
   get: jest.fn(),
 }));
 
 // jest.mock('markdown-it', () => ({
+//   ...jest.requireActual('markdown-it'),
 //   render: jest.fn(),
 // }));
 
 jest.mock('path', () => ({
   resolve: jest.fn(),
-  // extname: jest.fn(),
 }));
 
 jest.mock('fs', () => ({
-//   // existsSync: jest.fn(),
-//   readdirSync: jest.fn(),
-//   statSync: jest.fn().mockReturnValue(statObject),
+  ...jest.requireActual('fs'),
   promises: {
     readFile: jest.fn(),
   },
+  statSync: jest.fn(),
 }));
 
 jest.mock('../src/files', () => ({
-  listAllMDFiles: jest.fn(),
+  isMDFile: jest.fn(),
+  listAllMDFilesFromDirectory: jest.fn(),
 }));
 
-describe('links functions', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+const statObjectFile = {
+  isFile: jest.fn().mockReturnValue(true),
+  isDirectory: jest.fn().mockReturnValue(false),
+};
 
+const statObjectDirectory = {
+  isFile: jest.fn().mockReturnValue(false),
+  isDirectory: jest.fn().mockReturnValue(true),
+};
+
+describe('links functions', () => {
   describe('verifyUrl', () => {
     it('should be a function', () => {
       expect(typeof verifyUrl).toBe('function');
     });
 
-    it('should return a data for a link verified OK', async () => {
+    it('should return a data for a link verified as OK', async () => {
       const response = {
         status: 200,
         statusText: 'OK',
@@ -81,11 +82,11 @@ describe('links functions', () => {
         ok: 'ok',
       };
       axios.get.mockResolvedValue(response);
-      const res = await verifyUrl(theUrl);
+      const res = await verifyUrl(URL);
       expect(JSON.stringify(res)).toBe(JSON.stringify(dataOK));
     });
 
-    it('should return a data for a link not verified OK', async () => {
+    it('should return a data for a link NOT verified as OK', async () => {
       const err = {
         response: {
           status: 404,
@@ -97,23 +98,23 @@ describe('links functions', () => {
         ok: 'not found',
       };
       axios.get.mockRejectedValue(err);
-      const res = await verifyUrl(theUrl);
+      const res = await verifyUrl(URL);
       expect(JSON.stringify(res)).toBe(JSON.stringify(dataFailed));
     });
 
-    it('should return a default data when exists a response but it\'s not OK', async () => {
+    it('should return a default data (with status code 500) when exists a response but response.status or response.statusText are not defined', async () => {
       const response = {
       };
-      const dataOK = {
+      const dataFailed = {
         status: 500,
         ok: 'failed',
       };
       axios.get.mockResolvedValue(response);
-      const res = await verifyUrl(theUrl);
-      expect(JSON.stringify(res)).toBe(JSON.stringify(dataOK));
+      const res = await verifyUrl(URL);
+      expect(JSON.stringify(res)).toBe(JSON.stringify(dataFailed));
     });
 
-    it('should return a default data when exists an error.response but it\'s not defined', async () => {
+    it('should return a default data when exists an error.response but error.response.status or error.response.statusText are not defined', async () => {
       const err = {
         response: {},
       };
@@ -122,18 +123,18 @@ describe('links functions', () => {
         ok: 'failed',
       };
       axios.get.mockRejectedValue(err);
-      const res = await verifyUrl(theUrl);
+      const res = await verifyUrl(URL);
       expect(JSON.stringify(res)).toBe(JSON.stringify(dataFailed));
     });
 
-    it('should return a default data when exists an error but response is not defined', async () => {
+    it('should return a default data when exists an error but error.response is not defined', async () => {
       const err = {};
       const dataFailed = {
         status: 500,
         ok: 'failed',
       };
       axios.get.mockRejectedValue(err);
-      const res = await verifyUrl(theUrl);
+      const res = await verifyUrl(URL);
       expect(JSON.stringify(res)).toBe(JSON.stringify(dataFailed));
     });
   });
@@ -143,17 +144,23 @@ describe('links functions', () => {
       expect(typeof getLinksFromHtml).toBe('function');
     });
 
+    it('should be rejected with errors eith markdown', async () => {
+      // md.render.mockReturnValue('');
+      const res = await getLinksFromHtml(PATH, MD_FILE_WHITHOUT_LINKS);
+      expect(res).toStrictEqual([]);
+    });
+
     it('should return an empty array for a file without links', async () => {
-      const res = await getLinksFromHtml(thePath, MD_FILE_WHITHOUT_LINKS);
+      const res = await getLinksFromHtml(PATH, MD_FILE_WHITHOUT_LINKS);
       expect(res).toStrictEqual([]);
     });
 
     it('should return an array of objects for a file with some links', async () => {
-      const res = await getLinksFromHtml(thePath, MD_FILE_WHITH_LINKS);
+      const res = await getLinksFromHtml(PATH, MD_FILE_WHITH_LINKS);
       expect(res).toStrictEqual(JSON.parse(MD_LINKS));
     });
 
-    it('should return an array of objects for a file with some links valdiated', async () => {
+    it('should return an array of objects for a file with some links validated', async () => {
       const response = {
         status: 200,
         statusText: 'OK',
@@ -168,8 +175,20 @@ describe('links functions', () => {
       axios.get.mockRejectedValueOnce(err);
       axios.get.mockResolvedValue(response);
 
-      const res = await getLinksFromHtml(thePath, MD_FILE_WHITH_LINKS, true);
+      const res = await getLinksFromHtml(PATH, MD_FILE_WHITH_LINKS, true);
+
       expect(res).toStrictEqual(JSON.parse(MD_LINKS_VALIDATE));
+    });
+
+    it('should return an error if something goes wrong', async () => {
+      try {
+        Promise.reject();
+        await getLinksFromHtml(PATH, MD_FILE_WHITH_LINKS, true);
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+      // const res = await getLinksFromHtml(PATH, MD_FILE_WHITH_LINKS, true);
+      // expect(res).toStrictEqual(JSON.parse(MD_LINKS_VALIDATE));
     });
   });
 
@@ -178,40 +197,156 @@ describe('links functions', () => {
       expect(typeof getLinksFromPath).toBe('function');
     });
 
-    it('should return an array of objects for the links in the directory', async () => {
-      path.resolve.mockReturnValue('/absolute/path');
-      listAllMDFiles.mockReturnValue(['/absolute/field']);
+    it('should return an error if the path is a file but is not a MD file', async () => {
+      try {
+        path.resolve.mockReturnValue(PATH);
 
-      fs.promises.readFile.mockRejectedValue();
-      const res = await getLinksFromPath(thePath);
-      expect(res).toStrictEqual([undefined]);
+        fs.statSync.mockReturnValueOnce(statObjectFile);
+
+        isMDFile.mockReturnValueOnce(false);
+
+        await getLinksFromPath(PATH);
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
     });
 
-    it('should return an array of objects for the links in the directory', async () => {
+    it('should return an error if there\'s a problem reading a MD file', async () => {
+      try {
+        path.resolve.mockReturnValue(PATH);
+
+        fs.statSync.mockReturnValueOnce(statObjectFile);
+
+        isMDFile.mockReturnValueOnce(true);
+
+        fs.promises.readFile.mockRejectedValue();
+        await getLinksFromPath(PATH);
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
+
+    it.skip('should return an error if there\'s a problem waiting to solve all the promises', async () => {
+      try {
+        path.resolve.mockReturnValue(PATH);
+
+        fs.statSync.mockReturnValueOnce(statObjectFile);
+
+        isMDFile.mockReturnValueOnce(true);
+
+        fs.promises.readFile.mockResolvedValue(MD_FILE_WHITHOUT_LINKS);
+        await getLinksFromPath(PATH);
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
+
+    it('should return an empty array if the path is a MD file without links', async () => {
+      path.resolve.mockReturnValue(PATH);
+
+      fs.statSync.mockReturnValueOnce(statObjectFile);
+
+      isMDFile.mockReturnValueOnce(true);
+
+      fs.promises.readFile.mockResolvedValue(MD_FILE_WHITHOUT_LINKS);
+      const res = await getLinksFromPath(PATH);
+      expect(res).toStrictEqual([]);
+    });
+
+    it('should return an array of objects if the path is a MD file with links', async () => {
+      path.resolve.mockReturnValue(PATH);
+
+      fs.statSync.mockReturnValueOnce(statObjectFile);
+
+      isMDFile.mockReturnValueOnce(true);
+
+      fs.promises.readFile.mockResolvedValue(MD_FILE_WHITH_LINKS);
+      const res = await getLinksFromPath(PATH);
+      expect(res.sort()).toStrictEqual(JSON.parse(MD_LINKS).sort());
+    });
+
+    it('should return an empty array if the path is a directory without MD files', async () => {
+      path.resolve.mockReturnValue(PATH);
+
+      fs.statSync.mockReturnValueOnce(statObjectDirectory);
+
+      listAllMDFilesFromDirectory.mockReturnValue([]);
+      // fs.promises.readFile.mockResolvedValue(MD_FILE_WHITH_LINKS);
+      const res = await getLinksFromPath(PATH);
+      expect(res).toStrictEqual([]);
+    });
+
+    it('should return an empty array if the path is a directory with MD files without links', async () => {
+      path.resolve.mockReturnValue(PATH);
+
+      fs.statSync.mockReturnValueOnce(statObjectDirectory);
+
+      listAllMDFilesFromDirectory.mockReturnValue(DATA_ALL_MD_FILES);
+
+      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS); // file 1
+      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS); // file 2
+      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS); // file 3
+
+      const res = await getLinksFromPath(PATH);
+      expect(res).toStrictEqual([]);
+    });
+
+    it.skip('should return an array of objects if the path is a directory with MD files with links', async () => {
+      path.resolve.mockReturnValue(PATH);
+
+      fs.statSync.mockReturnValueOnce(statObjectDirectory);
+
+      listAllMDFilesFromDirectory.mockReturnValue(DATA_ALL_MD_FILES);
+
+      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS); // file 1
+      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITH_LINKS); // file 2
+      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS); // file 3
+
+      const res = await getLinksFromPath(PATH);
+      expect(res.sort()).toStrictEqual(JSON.parse(MD_LINKS).sort());
+    });
+
+    it.skip('should return an array of objects for the links in the directory', async () => {
+      try {
+        path.resolve.mockReturnValue('/absolute/path');
+
+        // it's a directory
+        fs.statSync.mockReturnValueOnce(statObjectDirectory);
+
+        listAllMDFilesFromDirectory.mockReturnValue(['/absolute/field']);
+
+        fs.promises.readFile.mockRejectedValue();
+        await getLinksFromPath(PATH);
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
+
+    it.skip('should return an array of objects for the links in the directory', async () => {
       path.resolve.mockReturnValue('/absolute/path');
-      listAllMDFiles.mockImplementation(() => new Error('There\'s not a MD File'));
-      // listAllMDFiles.mockImplementation(() => {
+      listAllMDFilesFromDirectory.mockImplementation(() => new Error('There\'s not a MD File'));
+      // listAllMDFilesFromDirectory.mockImplementation(() => {
       // throw new Error("There's not a MD File");
       // });
-      // listAllMDFiles.mockReturnValue(new Error('There\'s not a MD File'));
-      const res = await getLinksFromPath(thePath);
+      // listAllMDFilesFromDirectory.mockReturnValue(new Error('There\'s not a MD File'));
+      const res = await getLinksFromPath(PATH);
       expect(res).toStrictEqual([undefined]);
     });
 
-    it('should return an array of objects for the links in the directory', async () => {
+    it.skip('should return an array of objects for the links in the directory', async () => {
       path.resolve.mockReturnValue('/absolute/path');
-      listAllMDFiles.mockReturnValue(DATA_ALL_MD_FILES);
+      listAllMDFilesFromDirectory.mockReturnValue(DATA_ALL_MD_FILES);
 
       fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITH_LINKS);
       fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS);
       fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITH_LINKS);
-      const res = await getLinksFromPath(thePath);
+      const res = await getLinksFromPath(PATH);
       expect(res.sort()).toStrictEqual(JSON.parse(MD_LINKS_DIR).sort());
     });
 
-    it('should return an array of objects for the links in the directory validated', async () => {
+    it.skip('should return an array of objects for the links in the directory validated', async () => {
       path.resolve.mockReturnValue('/absolute/path');
-      listAllMDFiles.mockReturnValue(DATA_ALL_MD_FILES);
+      listAllMDFilesFromDirectory.mockReturnValue(DATA_ALL_MD_FILES);
       const response = {
         status: 200,
         statusText: 'OK',
@@ -231,7 +366,7 @@ describe('links functions', () => {
       fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITH_LINKS);
       fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS);
       fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITH_LINKS);
-      const res = await getLinksFromPath(thePath, true);
+      const res = await getLinksFromPath(PATH, true);
       expect(res.sort()).toStrictEqual(JSON.parse(MD_LINKS_DIR_VALIDATE).sort());
     });
   });

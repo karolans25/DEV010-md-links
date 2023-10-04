@@ -27,11 +27,7 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 // const thePath = './some/example.md';
 // const thePath = './some/example1.md';
 // const thePath = './README.md';
-// const thePath = './grandma/example3.md';
-// mdlinks(thePath, true)
-//   .then((res) => console.log(res, res.length))
-//   .catch((err) => console.log(err.message));
-// mdlinks(thePath)
+// mdl// mdlinks(thePath)
 //   .then((res) => console.log(res))
 //   .catch((err) => console.log(err.message));
 
