@@ -86,7 +86,6 @@ const getLinksFromPath = (thePath, validate) => {
   let mdFiles = [];
 
   const statObject = statSync(absolutePath);
-  console.log(statObject.isFile(), statObject.isDirectory());
   if (statObject.isFile()) {
     if (isMDFile(absolutePath)) {
       mdFiles.push(absolutePath);
@@ -100,7 +99,6 @@ const getLinksFromPath = (thePath, validate) => {
   links = mdFiles.map((route) => readFile(route, 'utf8')
     .then((text) => {
       links = getLinksFromHtml(route, text, validate);
-      console.log(links);
       return links;
     })
     .catch((err) => err));

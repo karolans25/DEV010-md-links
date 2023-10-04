@@ -179,17 +179,6 @@ describe('links functions', () => {
 
       expect(res).toStrictEqual(JSON.parse(MD_LINKS_VALIDATE));
     });
-
-    it('should return an error if something goes wrong', async () => {
-      try {
-        Promise.reject();
-        await getLinksFromHtml(PATH, MD_FILE_WHITH_LINKS, true);
-      } catch (err) {
-        expect(err).toBeInstanceOf(Error);
-      }
-      // const res = await getLinksFromHtml(PATH, MD_FILE_WHITH_LINKS, true);
-      // expect(res).toStrictEqual(JSON.parse(MD_LINKS_VALIDATE));
-    });
   });
 
   describe('getLinksFromPath', () => {
