@@ -11,7 +11,7 @@ const fs = require('fs');
 // const axios = require('axios');
 // const fsP = require('fs').promises;
 // const readFile = require('fs').promises;
-const { mdlinks } = require('../md-links');
+const { mdlinks } = require('../index');
 const { getLinksFromPath } = require('../src/links');
 
 const thePath = '/some/example';

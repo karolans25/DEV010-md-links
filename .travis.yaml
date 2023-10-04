@@ -1,0 +1,14 @@
+language: javascript
+branches:
+  only:
+    -"/^release-[0-999].[0-999]$/"
+    - main
+notifications:
+  email:
+    recipients:
+      - dev.carolina.pulido01@gmail.com
+
+install:
+  - npm install 
+script:
+  - npm run jest --coverage

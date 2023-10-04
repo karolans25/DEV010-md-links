@@ -1,10 +1,10 @@
 #!/usr/bin/env node
+
 const chalk = require('chalk');
 const yargs = require('yargs');
 const path = require('path');
-const { mdlinks } = require('./md-links');
+const { mdlinks } = require('./index');
 
-// Define las opciones booleanas sin valores
 const options = yargs
   .usage(`\n${chalk.green.bold('Usage: $0 <./path/file/or/dir> [options]')}`)
   .option('validate', {

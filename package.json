@@ -1,5 +1,5 @@
 {
-  "name": "md-links",
+  "name": "@karolans25/md-links",
   "version": "0.1.0",
   "license": "MIT",
   "engines": {
@@ -30,11 +30,12 @@
     "markdown-it": "^13.0.1",
     "yargs": "^17.7.2"
   },
-  "description": "## Índice",
-  "main": "cli.js",
+  "description": "Find links in markdown files from file's path or directory's path",
+  "main": "index.js",
   "directories": {
     "doc": "docs",
-    "test": "test"
+    "test": "test",
+    "example": "grandma"
   },
   "repository": {
     "type": "git",
@@ -50,5 +51,8 @@
   "bugs": {
     "url": "https://github.com/karolans25/DEV010-md-links/issues"
   },
-  "homepage": "https://github.com/karolans25/DEV010-md-links#readme"
+  "homepage": "https://github.com/karolans25/DEV010-md-links#readme",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }

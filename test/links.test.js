@@ -8,10 +8,6 @@ const MD_LINKS = '[{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Mar
 
 const MD_LINKS_VALIDATE = '[{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"/some/example","line":7,"status":404,"ok":"failed"},{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"/some/example","line":7,"status":404,"ok":"failed"},{"href":"https://nodejs.org/","text":"Node.js","file":"/some/example","line":18,"status":200,"ok":"ok"}]';
 
-const MD_LINKS_DIR = '[{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/example1.md","line":7},{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/example1.md","line":7},{"href":"https://nodejs.org/","text":"Node.js","file":"some/example1.md","line":18},{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/somes/example2.md","line":7},{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/somes/example2.md","line":7},{"href":"https://nodejs.org/","text":"Node.js","file":"some/somes/example2.md","line":18}]';
-
-const MD_LINKS_DIR_VALIDATE = '[{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/example1.md","line":7,"status":404,"ok":"failed"},{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/example1.md","line":7,"status":404,"ok":"failed"},{"href":"https://nodejs.org/","text":"Node.js","file":"some/example1.md","line":18,"status":200,"ok":"ok"},{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/somes/example2.md","line":7,"status":404,"ok":"failed"},{"href":"https://es.wikipedia.org/wiki/Markdownx","text":"Markdown","file":"some/somes/example2.md","line":7,"status":404,"ok":"failed"},{"href":"https://nodejs.org/","text":"Node.js","file":"some/somes/example2.md","line":18,"status":200,"ok":"ok"}]';
-
 const URL = 'https://link_example.com';
 const PATH = '/some/example';
 
@@ -260,7 +256,6 @@ describe('links functions', () => {
       fs.statSync.mockReturnValueOnce(statObjectDirectory);
 
       listAllMDFilesFromDirectory.mockReturnValue([]);
-      // fs.promises.readFile.mockResolvedValue(MD_FILE_WHITH_LINKS);
       const res = await getLinksFromPath(PATH);
       expect(res).toStrictEqual([]);
     });
@@ -278,85 +273,6 @@ describe('links functions', () => {
 
       const res = await getLinksFromPath(PATH);
       expect(res).toStrictEqual([]);
-    });
-
-    it.skip('should return an array of objects if the path is a directory with MD files with links', async () => {
-      path.resolve.mockReturnValue(PATH);
-
-      fs.statSync.mockReturnValueOnce(statObjectDirectory);
-
-      listAllMDFilesFromDirectory.mockReturnValue(DATA_ALL_MD_FILES);
-
-      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS); // file 1
-      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITH_LINKS); // file 2
-      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS); // file 3
-
-      const res = await getLinksFromPath(PATH);
-      expect(res.sort()).toStrictEqual(JSON.parse(MD_LINKS).sort());
-    });
-
-    it.skip('should return an array of objects for the links in the directory', async () => {
-      try {
-        path.resolve.mockReturnValue('/absolute/path');
-
-        // it's a directory
-        fs.statSync.mockReturnValueOnce(statObjectDirectory);
-
-        listAllMDFilesFromDirectory.mockReturnValue(['/absolute/field']);
-
-        fs.promises.readFile.mockRejectedValue();
-        await getLinksFromPath(PATH);
-      } catch (err) {
-        expect(err).toBeInstanceOf(Error);
-      }
-    });
-
-    it.skip('should return an array of objects for the links in the directory', async () => {
-      path.resolve.mockReturnValue('/absolute/path');
-      listAllMDFilesFromDirectory.mockImplementation(() => new Error('There\'s not a MD File'));
-      // listAllMDFilesFromDirectory.mockImplementation(() => {
-      // throw new Error("There's not a MD File");
-      // });
-      // listAllMDFilesFromDirectory.mockReturnValue(new Error('There\'s not a MD File'));
-      const res = await getLinksFromPath(PATH);
-      expect(res).toStrictEqual([undefined]);
-    });
-
-    it.skip('should return an array of objects for the links in the directory', async () => {
-      path.resolve.mockReturnValue('/absolute/path');
-      listAllMDFilesFromDirectory.mockReturnValue(DATA_ALL_MD_FILES);
-
-      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITH_LINKS);
-      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS);
-      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITH_LINKS);
-      const res = await getLinksFromPath(PATH);
-      expect(res.sort()).toStrictEqual(JSON.parse(MD_LINKS_DIR).sort());
-    });
-
-    it.skip('should return an array of objects for the links in the directory validated', async () => {
-      path.resolve.mockReturnValue('/absolute/path');
-      listAllMDFilesFromDirectory.mockReturnValue(DATA_ALL_MD_FILES);
-      const response = {
-        status: 200,
-        statusText: 'OK',
-      };
-      const err = {
-        response: {
-          status: 404,
-          statusText: 'NOT FOUND',
-        },
-      };
-      axios.get.mockRejectedValueOnce(err);
-      axios.get.mockRejectedValueOnce(err);
-      axios.get.mockResolvedValueOnce(response);
-      axios.get.mockRejectedValueOnce(err);
-      axios.get.mockRejectedValueOnce(err);
-      axios.get.mockResolvedValue(response);
-      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITH_LINKS);
-      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITHOUT_LINKS);
-      fs.promises.readFile.mockResolvedValueOnce(MD_FILE_WHITH_LINKS);
-      const res = await getLinksFromPath(PATH, true);
-      expect(res.sort()).toStrictEqual(JSON.parse(MD_LINKS_DIR_VALIDATE).sort());
     });
   });
 });

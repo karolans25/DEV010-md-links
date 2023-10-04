@@ -132,12 +132,16 @@ describe('files functions', () => {
     });
 
     it('should return an empty array with a directory path without markdown files', () => {
+      fs.statSync.mockReturnValue(statObjectFile);
+      path.extname.mockReturnValue('.txt');
       const res = listAllMDFilesFromDirectory(anotherPath, []);
       expect(res).toStrictEqual([]);
     });
 
     it('should return an error if the path is a file', () => {
       try {
+        fs.statSync.mockReturnValue(statObjectFile);
+        path.extname.mockReturnValue('.txt');
         listAllMDFilesFromDirectory(filePath, []);
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
