@@ -1,36 +1,21 @@
-const { existsSync } = require('fs');
-const { getLinksFromPath } = require('./src/links');
+const mdLinks = require('./lib/md-links');
 
-const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
-  if (typeof thePath !== 'string' || thePath === '') {
-    reject(new TypeError('The path is invalid'));
-  }
-
-  if (existsSync(thePath)) {
-    getLinksFromPath(thePath, validate)
-      .then((result) => {
-        if (result.length === 0) {
-          reject(new Error('There\'s no links'));
-        }
-        resolve(result);
-      })
-      .catch((err) => reject(err));
-  } else {
-    reject(new Error('No such file or directory'));
-  }
-});
+// This module is intended to unwrap mdlinks default export as named.
+const {
+  mdlinks,
+} = mdLinks;
 
 // const thePath = 200;
 // const thePath = null;
-// const thePath = './somes/example.md';
-// const thePath = './some/example.txt';
-// const thePath = './some/example.md';
-// const thePath = './some/example1.md';
+// const thePath = './REA';
 // const thePath = './README.md';
-// mdl// mdlinks(thePath)
-//   .then((res) => console.log(res))
+// const thePath = './examples/grandma/example';
+// const thePath = './examples/grandma/example1.txt';
+// const thePath = './examples/';
+// mdlinks(thePath, true)
+//   .then((res) => console.log(res, res.length))
 //   .catch((err) => console.log(err.message));
 
-module.exports = {
+module.export = {
   mdlinks,
 };

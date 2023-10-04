@@ -1,11 +1,11 @@
-const DATA_ALL_MD_FILES = ['grandma/README.md', 'grandma/aunt/example0.md', 'grandma/example2.md', 'grandma/example1.md', 'grandma/mom/daughter/example3.md', 'grandma/mom/example5.md', 'grandma/mom/example4.md'];
+const DATA_ALL_MD_FILES = ['examples/grandma/README.md', 'examples/grandma/aunt/example0.md', 'examples/grandma/example2.md', 'examples/grandma/example1.md', 'examples/grandma/mom/daughter/example3.md', 'examples/grandma/mom/example5.md', 'examples/grandma/mom/example4.md'];
 
 const fs = require('fs');
 const path = require('path');
 
 const {
   isMDFile, listAllMDFilesFromDirectory,
-} = require('../src/files');
+} = require('../lib/core/files');
 
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
@@ -17,10 +17,10 @@ jest.mock('fs', () => ({
   statSync: jest.fn(),
 }));
 
-const thePath = './grandma';
-const anotherPath = './grandma/mom/sister';
-const mdFilePath = './grandma/README.md';
-const filePath = './grandma/example1.txt';
+const thePath = './examples/grandma';
+const anotherPath = './examples/grandma/mom/sister';
+const mdFilePath = './examples/grandma/README.md';
+const filePath = './examples/grandma/example1.txt';
 
 const statObjectFile = {
   isFile: jest.fn().mockReturnValue(true),

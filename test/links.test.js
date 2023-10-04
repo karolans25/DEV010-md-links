@@ -18,11 +18,11 @@ const axios = require('axios');
 
 const {
   verifyUrl, getLinksFromHtml, getLinksFromPath,
-} = require('../src/links');
+} = require('../lib/core/links');
 
 const {
   isMDFile, listAllMDFilesFromDirectory,
-} = require('../src/files');
+} = require('../lib/core/files');
 
 // const md = markdownIt();
 
@@ -47,7 +47,7 @@ jest.mock('fs', () => ({
   statSync: jest.fn(),
 }));
 
-jest.mock('../src/files', () => ({
+jest.mock('../lib/core/files', () => ({
   isMDFile: jest.fn(),
   listAllMDFilesFromDirectory: jest.fn(),
 }));

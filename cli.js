@@ -3,7 +3,7 @@
 const chalk = require('chalk');
 const yargs = require('yargs');
 const path = require('path');
-const { mdlinks } = require('./index');
+const { mdlinks } = require('./lib/md-links');
 
 const options = yargs
   .usage(`\n${chalk.green.bold('Usage: $0 <./path/file/or/dir> [options]')}`)

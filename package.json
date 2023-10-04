@@ -1,6 +1,6 @@
 {
   "name": "@karolans25/md-links",
-  "version": "0.1.0",
+  "version": "v0.1.1",
   "license": "MIT",
   "engines": {
     "node": ">=16.x"

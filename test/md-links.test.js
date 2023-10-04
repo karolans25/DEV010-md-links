@@ -11,8 +11,8 @@ const fs = require('fs');
 // const axios = require('axios');
 // const fsP = require('fs').promises;
 // const readFile = require('fs').promises;
-const { mdlinks } = require('../index');
-const { getLinksFromPath } = require('../src/links');
+const { mdlinks } = require('../lib/md-links');
+const { getLinksFromPath } = require('../lib/core/links');
 
 const thePath = '/some/example';
 
@@ -33,7 +33,7 @@ jest.mock('axios', () => ({
   get: jest.fn(),
 }));
 
-jest.mock('../src/links', () => ({
+jest.mock('../lib/core/links', () => ({
   getLinksFromPath: jest.fn(),
 }));
 
