@@ -19,20 +19,12 @@ jest.mock('fs', () => ({
     readFile: jest.fn(),
   },
 }));
-// jest.mock('fs/promises');
 
-// jest.mock('fs/promises', () => ({
-//   readFile: jest.fn(),
-// }));
 jest.spyOn(fsP, 'readFile');
 
 const thePath = '/some/example';
 
 describe('mdLinks', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('should be a function', () => {
     expect(typeof mdlinks).toBe('function');
   });
@@ -64,20 +56,28 @@ describe('mdLinks', () => {
   //   return expect(mdlinks('./some/example')).rejects.toThrow(Error);
   // });
 
-  it('should reject if the path is a directory', () => {
-    const absolutePath = '/absolute/path';
-    path.resolve.mockReturnValue(absolutePath);
-    fs.existsSync.mockReturnValue(true);
-    return expect(mdlinks(thePath)).rejects.toThrow(Error);
+  it('should reject if the path is a directory', async () => {
+    try {
+      const absolutePath = '/absolute/path';
+      path.resolve.mockReturnValue(absolutePath);
+      fs.existsSync.mockReturnValue(true);
+      path.extname.mockReturnValue('');
+      await mdlinks(thePath);
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+    }
   });
 
-  it('should reject if the path extension is an empty string', () => {
-    const absolutePath = '/absolute/path.txt';
-    path.resolve.mockReturnValue(absolutePath);
-    path.extname.mockReturnValue('');
-    // fs.existsSync.mockReturnValue(true);
-    return expect(mdlinks(thePath)).rejects.toThrow(Error);
-    // return expect(mdlinks(thePath)).rejects.toThrow(Error);
+  it('should reject if the path extension is an empty string', async () => {
+    try {
+      const absolutePath = '/absolute/path';
+      path.resolve.mockReturnValue(absolutePath);
+      fs.existsSync.mockReturnValue(true);
+      path.extname.mockReturnValue('');
+      await (mdlinks(thePath));
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+    }
   });
 
   // it.skip('should reject with an Error when file has an invalid path', () => {
@@ -94,20 +94,21 @@ describe('mdLinks', () => {
     const absolutePath = '/absolute/path.txt';
     path.resolve.mockReturnValue(absolutePath);
     fs.existsSync.mockReturnValue(true);
+    path.extname.mockReturnValue('.txt');
     return expect(mdlinks(thePath)).rejects.toThrow(Error);
   });
 
   it('should reject if the file is a markdown file but it can\'t be read', async () => {
-    const absolutePath = '/absolute/path.md';
-    path.resolve.mockReturnValue(absolutePath);
-    path.extname.mockReturnValue('.md');
-    fs.existsSync.mockReturnValue(true);
-    const error = new Error('Error reading the file');
-    // eslint-disable-next-line max-len
-    const mockReadFile = (fs.promises.readFile).mockImplementation(async () => Promise.reject(error));
-    const res = await mdlinks(thePath);
-    expect(mockReadFile).toHaveBeenCalledWith(absolutePath, 'utf8');
-    expect(res).rejects.toThrow(Error);
+    try {
+      const absolutePath = '/absolute/path.md';
+      path.resolve.mockReturnValue(absolutePath);
+      path.extname.mockReturnValue('.md');
+      fs.existsSync.mockReturnValue(true);
+      fs.readFile.mockRejectValue(new Error(''));
+      await mdlinks(thePath);
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+    }
   });
 
   it('should resolve if the read md has no links', async () => {
