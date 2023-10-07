@@ -18,15 +18,25 @@ const markDownExtensions = [
 const verifyUrl = (url) => axios.get(url)
   .then((res) => {
     const data = {
-      status: res.status,
-      ok: (res.statusText === 'OK') ? 'ok' : 'fail',
+      status: res.status ? res.status : 500,
+      ok: res.statusText === 'OK' ? 'ok' : 'failed',
     };
     return data;
   })
   .catch((err) => {
+    let statusText = 'failed';
+    let statusCode = 500;
+    if (err.response) {
+      if (err.response.statusText) {
+        statusText = err.response.statusText.toLowerCase();
+      }
+      if (err.response.status) {
+        statusCode = err.response.status;
+      }
+    }
     const data = {
-      status: (err.response) ? err.response.status : 500,
-      ok: (err.response) ? err.response.statusText.toLowerCase() : 'failed',
+      status: statusCode,
+      ok: statusText,
     };
     return data;
   });
@@ -48,59 +58,50 @@ const verifyUrl = (url) => axios.get(url)
 //     return data;
 //   });
 
-const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve, reject) => {
-  try {
-    const links = [];
-    const html = md.render(text);
-    const lines = html.split('\n');
-    const max = lines.length;
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < max; i++) {
-      // const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1>(.*?)<\/a>/g;
-      const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(https?:\/\/.*?)\1>(.*?)<\/a>/g;
-      let match;
-      // eslint-disable-next-line no-cond-assign
-      while ((match = regex.exec(lines[i])) !== null) {
-        const link = {
-          href: match[2],
-          text: match[3],
-          file: filePath,
-          line: parseInt(i, 10) + 1,
-        };
-        links.push(link);
-      }
+const getLinksFromHtml = (filePath, text, validate) => new Promise((resolve) => {
+  const links = [];
+  const linesFromMDFile = text.split('\n');
+  const max = linesFromMDFile.length;
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < max; i++) {
+    const html = md.render(linesFromMDFile[i]);
+    const regex = /<a\s+(?:[^>]*?\s+)?href=(["'])(?!\.\/|#)(.*?)\1>(.*?)<\/a>/g;
+    let match;
+    // eslint-disable-next-line no-cond-assign
+    while ((match = regex.exec(html)) !== null) {
+      const link = {
+        href: match[2],
+        text: match[3],
+        file: filePath,
+        line: parseInt(i, 10) + 1,
+      };
+      links.push(link);
     }
-    if (validate) {
-      const linksVerified = links.map((link) => verifyUrl(link.href)
-        .then((res) => {
-          // eslint-disable-next-line no-param-reassign
-          link.status = res.status;
-          // eslint-disable-next-line no-param-reassign
-          link.ok = res.ok;
-          return link;
-        }));
+  }
+  if (validate) {
+    const linksVerified = links.map((link) => verifyUrl(link.href)
+      .then((res) => {
+        // eslint-disable-next-line no-param-reassign
+        link.status = res.status;
+        // eslint-disable-next-line no-param-reassign
+        link.ok = (res.ok === 'ok') ? res.ok : 'failed';
+        return link;
+      }));
 
-      Promise.all(linksVerified).then((result) => {
-        resolve(result);
-      });
-    } else {
-      resolve(links);
-    }
-  } catch (err) {
-    reject(err);
+    Promise.all(linksVerified).then((result) => {
+      resolve(result);
+    });
+  } else {
+    resolve(links);
   }
 });
-
-const readAFile = (file) => readFile(file, 'utf8');
-
-const fileExists = (filePath) => existsSync(filePath);
 
 const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
   if (typeof thePath !== 'string' || thePath === '') {
     reject(new TypeError('The path is invalid'));
   }
   const absolutePath = path.resolve(thePath);
-  const exists = fileExists(absolutePath);
+  const exists = existsSync(absolutePath);
   if (!exists) {
     reject(new Error('No such file or directory'));
   }
@@ -111,12 +112,11 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
   if (extension !== '' && !markDownExtensions.includes(extension)) {
     reject(new Error('File is not a markdown file'));
   }
-  readAFile(absolutePath)
+  readFile(absolutePath, 'utf8')
     .then((text) => {
       const links = getLinksFromHtml(absolutePath, text, validate);
       resolve(links);
-    })
-    .catch((err) => reject(err));
+    });
 });
 
 // const thePath = 200;
@@ -134,5 +134,5 @@ const mdlinks = (thePath, validate) => new Promise((resolve, reject) => {
 //   .catch((err) => console.log(err.message));
 
 module.exports = {
-  mdlinks,
+  verifyUrl, getLinksFromHtml, mdlinks,
 };
