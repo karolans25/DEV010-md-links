@@ -53,6 +53,6 @@
   },
   "homepage": "https://github.com/karolans25/DEV010-md-links#readme",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "@karolans25:registry": "https://npm.pkg.github.com"
   }
 }
